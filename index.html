@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AMP React</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <script src="https://unpkg.com/react/umd/react.development.js"></script>
+    <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+    <script type="module" src="./amp-react-img.js"></script>
+  </head>
+  <body>
+
+    <h1>amp-react-img</h1>
+    <amp-react-img
+      id="first"
+      alt="preact img"
+      srcset="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
+      width=100
+      height=100>
+    </amp-react-img>
+
+    <div style="height: 500vh">scroll down...</div>
+
+    <amp-react-img
+      id="second"
+      alt="bindable"
+      src="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true"
+      width=100
+      height=100>
+    </amp-react-img>
+
+  </body>
+</html>
