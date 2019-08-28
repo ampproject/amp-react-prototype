@@ -16,11 +16,6 @@
 
 import AmpElementFactory from './amp-element.js';
 
-function devAssert(truthy, ...args) {
-  console.assert(truthy, ...args);
-  return truthy;
-}
-
 /**
  * ReactCompatibleBaseElement is a compatibility wrapper around AMP's
  * BaseElement. It takes a Component to compose, and calls renders the
