@@ -39,6 +39,8 @@ export default function ReactCompatibleBaseElement(Component) {
 
       /** @private {?Component} */
       this.el_ = null;
+
+      this.win = self;
     }
 
     /**
@@ -75,14 +77,6 @@ export default function ReactCompatibleBaseElement(Component) {
         return;
       }
 
-      // Mutating src should override existing srcset, so remove the latter.
-      if (
-        mutations['src'] &&
-        !mutations['srcset'] &&
-        this.element.hasAttribute('srcset')
-      ) {
-        this.element.removeAttribute('srcset');
-      }
       this.rerender_();
     }
 
@@ -125,6 +119,16 @@ export default function ReactCompatibleBaseElement(Component) {
       return out;
     }
 
+
+
+
+
+    /** Mocks of the BaseElement base class methods/props */
+
+    getWin() {
+      return this.win;
+    }
+
     getViewport() {
       return {
         getWidth() {
@@ -135,6 +139,365 @@ export default function ReactCompatibleBaseElement(Component) {
 
     getLayoutWidth() {
       return this.clientWidth;
+    }
+
+
+    /** Unimplemented things */
+
+    get preconnect() {
+      throw new Error('unimplemented');
+    }
+
+    signals() {
+      throw new Error('unimplemented');
+    }
+
+    getDefaultActionAlias() {
+      throw new Error('unimplemented');
+    }
+
+    getLayoutPriority() {
+      throw new Error('unimplemented');
+    }
+
+    updateLayoutPriority() {
+      throw new Error('unimplemented');
+    }
+
+    getLayout() {
+      throw new Error('unimplemented');
+    }
+
+    getPageLayoutBox() {
+      throw new Error('unimplemented');
+    }
+
+    getAmpDoc() {
+      throw new Error('unimplemented');
+    }
+
+
+    getVsync() {
+      throw new Error('unimplemented');
+    }
+
+
+    getLayoutWidth() {
+      throw new Error('unimplemented');
+    }
+
+
+    getConsentPolicy() {
+      throw new Error('unimplemented');
+    }
+
+
+    isLayoutSupported(layout) {
+      throw new Error('unimplemented');
+    }
+
+
+    isAlwaysFixed() {
+      throw new Error('unimplemented');
+    }
+
+
+    isInViewport() {
+      throw new Error('unimplemented');
+    }
+
+
+    upgradeCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    createdCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    firstAttachedCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    buildCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    preconnectCallback(opt_onLayout) {
+      throw new Error('unimplemented');
+    }
+
+
+    detachedCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    prerenderAllowed() {
+      throw new Error('unimplemented');
+    }
+
+
+    createPlaceholderCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    createLoaderLogoCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    renderOutsideViewport() {
+      throw new Error('unimplemented');
+    }
+
+
+    idleRenderOutsideViewport() {
+      throw new Error('unimplemented');
+    }
+
+
+    isRelayoutNeeded() {
+      throw new Error('unimplemented');
+    }
+
+
+    layoutCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    firstLayoutCompleted() {
+      throw new Error('unimplemented');
+    }
+
+
+    viewportCallback(unusedInViewport) {
+      throw new Error('unimplemented');
+    }
+
+
+    pauseCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    resumeCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    unlayoutCallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    unlayoutOnPause() {
+      throw new Error('unimplemented');
+    }
+
+
+    reconstructWhenReparented() {
+      throw new Error('unimplemented');
+    }
+
+
+    activate(unusedInvocation) {
+      throw new Error('unimplemented');
+    }
+
+
+    activationTrust() {
+      throw new Error('unimplemented');
+    }
+
+
+    loadPromise(element) {
+      throw new Error('unimplemented');
+    }
+
+
+    initActionMap_() {
+      throw new Error('unimplemented');
+    }
+
+
+    registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+      throw new Error('unimplemented');
+    }
+
+
+    registerDefaultAction(
+      handler,
+      alias = DEFAULT_ACTION,
+      minTrust = ActionTrust.HIGH
+    ) {
+      throw new Error('unimplemented');
+    }
+
+
+    executeAction(invocation, unusedDeferred) {
+      throw new Error('unimplemented');
+    }
+
+
+    getDpr() {
+      throw new Error('unimplemented');
+    }
+
+
+    propagateAttributes(attributes, element, opt_removeMissingAttrs) {
+      throw new Error('unimplemented');
+    }
+
+
+    forwardEvents(events, element) {
+      throw new Error('unimplemented');
+    }
+
+
+    getPlaceholder() {
+      throw new Error('unimplemented');
+    }
+
+
+    togglePlaceholder(state) {
+      throw new Error('unimplemented');
+    }
+
+
+    getFallback() {
+      throw new Error('unimplemented');
+    }
+
+
+    toggleFallback(state) {
+      throw new Error('unimplemented');
+    }
+
+
+    toggleLoading(state, opt_force) {
+      throw new Error('unimplemented');
+    }
+
+
+    isLoadingReused() {
+      throw new Error('unimplemented');
+    }
+
+
+    getOverflowElement() {
+      throw new Error('unimplemented');
+    }
+
+
+    renderStarted() {
+      throw new Error('unimplemented');
+    }
+
+
+    getRealChildNodes() {
+      throw new Error('unimplemented');
+    }
+
+
+    getRealChildren() {
+      throw new Error('unimplemented');
+    }
+
+
+    applyFillContent(element, opt_replacedContent) {
+      throw new Error('unimplemented');
+    }
+
+
+    getViewport() {
+      throw new Error('unimplemented');
+    }
+
+
+    getIntersectionElementLayoutBox() {
+      throw new Error('unimplemented');
+    }
+
+
+    changeHeight(newHeight) {
+      throw new Error('unimplemented');
+    }
+
+
+    collapse() {
+      throw new Error('unimplemented');
+    }
+
+
+    attemptCollapse() {
+      throw new Error('unimplemented');
+    }
+
+
+    attemptChangeHeight(newHeight) {
+      throw new Error('unimplemented');
+    }
+
+
+    attemptChangeSize(newHeight, newWidth, opt_event) {
+      throw new Error('unimplemented');
+    }
+
+
+    measureElement(measurer) {
+      throw new Error('unimplemented');
+    }
+
+
+    mutateElement(mutator, opt_element) {
+      throw new Error('unimplemented');
+    }
+
+
+    measureMutateElement(measurer, mutator, opt_element) {
+      throw new Error('unimplemented');
+    }
+
+
+    collapsedCallback(unusedElement) {
+      throw new Error('unimplemented');
+    }
+
+
+    expand() {
+      throw new Error('unimplemented');
+    }
+
+
+    expandedCallback(unusedElement) {
+      throw new Error('unimplemented');
+    }
+
+
+    mutatedAttributesCallback(unusedMutations) {
+      throw new Error('unimplemented');
+    }
+
+
+    onLayoutMeasure() {
+      throw new Error('unimplemented');
+    }
+
+
+    onMeasureChanged() {
+      throw new Error('unimplemented');
+    }
+
+
+    user() {
+      throw new Error('unimplemented');
     }
   }
 
