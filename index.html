@@ -5,6 +5,173 @@
     <title>AMP React</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 
+    <style>
+      /**
+      * We intentionally break with HTML5's default [hidden] styling to apply
+      * !important.
+      */
+      [hidden] {
+        /* This must be !important, else the toggle helper system would break down
+          due to specificity */
+        display: none !important;
+      }
+
+      .i-amphtml-element {
+        display: inline-block;
+      }
+
+      /* layout=nodisplay are automatically hidden until JS initializes. */
+      [layout=nodisplay]:not(.i-amphtml-element) {
+        display: none !important;
+      }
+
+      /* Initialized layout=nodisplay contain [hidden] */
+      .i-amphtml-layout-nodisplay[hidden],
+      [layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
+      {
+        /* Display is set/reset via the hidden attribute */
+      }
+      .i-amphtml-layout-nodisplay:not([hidden]),
+      [layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
+      {
+        /* Display is set/reset via the hidden attribute */
+      }
+
+      .i-amphtml-layout-fixed,
+      [layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+      {
+        display: inline-block;
+        position: relative;
+      }
+
+      .i-amphtml-layout-responsive,
+      [layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+      [width][height][sizes]:not(.i-amphtml-layout-responsive)
+      {
+        display: block;
+        position: relative;
+      }
+
+      .i-amphtml-layout-fixed-height,
+      [layout=fixed-height][height]
+      {
+        display: block;
+        position: relative;
+      }
+
+      .i-amphtml-layout-container,
+      [layout=container]
+      {
+        display: block;
+        position: relative;
+      }
+
+      .i-amphtml-layout-fill,
+      [layout=fill]:not(.i-amphtml-layout-fill)
+      {
+        display: block;
+        overflow: hidden !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      .i-amphtml-layout-flex-item,
+      [layout=flex-item]:not(.i-amphtml-layout-flex-item)
+      {
+        display: block;
+        position: relative;
+        flex: 1 1 auto;
+      }
+
+      .i-amphtml-layout-fluid {
+        position: relative;
+      }
+
+      .i-amphtml-layout-size-defined {
+        overflow: hidden !important;
+      }
+
+      .i-amphtml-layout-awaiting-size {
+        position: absolute !important;
+        top: auto !important;
+        bottom: auto !important;
+      }
+
+      i-amphtml-sizer {
+        display: block !important;
+      }
+
+      .i-amphtml-fill-content,
+      .i-amphtml-blurry-placeholder {
+        display: block;
+        /* These lines are a work around to this issue in iOS:     */
+        /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+        /* And: https://github.com/ampproject/amphtml/issues/11133 */
+        height: 0;
+        max-height: 100%;
+        max-width: 100%;
+        min-height: 100%;
+        min-width: 100%;
+        width: 0;
+        margin: auto;
+      }
+
+      .i-amphtml-layout-size-defined .i-amphtml-fill-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      .i-amphtml-layout-intrinsic .i-amphtml-sizer {
+        max-width: 100%;
+      }
+
+      .i-amphtml-replaced-content {
+        padding: 0 !important;
+        border: none !important;
+        /* TODO(dvoytenko): explore adding here object-fit. */
+      }
+
+      /* For author styling. */
+      .amp-unresolved {
+      }
+
+      .i-amphtml-unresolved {
+        position: relative;
+        overflow: hidden !important;
+      }
+
+      .i-amphtml-select-disabled {
+        user-select: none !important;
+      }
+
+      /* "notbuild" classes are set as soon as an element is created and removed
+        as soon as the element is built. */
+
+      .amp-notbuilt {
+        /* For author styling. */
+      }
+
+      .i-amphtml-notbuilt,
+      [layout]:not(.i-amphtml-element)
+      {
+        position: relative;
+        overflow: hidden !important;
+        color: transparent !important;
+      }
+
+      .i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+      [layout]:not([layout=container]):not(.i-amphtml-element) > *
+      {
+        display: none;
+      }
+    </style>
+
     <script src="https://unpkg.com/react/umd/react.development.js"></script>
     <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
     <script type="module" src="./src/amp-react-img.js"></script>
@@ -16,6 +183,7 @@
       id="first"
       alt="preact img"
       srcset="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
+      layout="fixed"
       width=100
       height=100>
     </amp-react-img>
@@ -26,6 +194,7 @@
       id="second"
       alt="bindable"
       src="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true"
+      layout="responsive"
       width=100
       height=100>
     </amp-react-img>
