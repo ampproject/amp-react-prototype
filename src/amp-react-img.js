@@ -101,7 +101,7 @@ class AmpImg extends React.Component {
   render() {
     const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
 
-    const {id} = this.props;
+    const { id } = this.props;
     if (id) {
       props['amp-img-id'] = id;
     }
@@ -111,40 +111,23 @@ class AmpImg extends React.Component {
     );
     props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
     props['decoding'] = 'async';
+    props['class'] = addToClass(
+      this.props.class,
+      'i-amphtml-fill-content i-amphtml-replaced-content'
+    );
 
-    const {prerender} = this.state;
+    const { prerender, sizer } = this.state;
     if (prerender && !this.prerenderAllowed_) {
       delete props['src'];
       delete props['srcset'];
     }
 
-    return React.createElement('img', props);
-  }
-
-  /**
-   * @param {boolean} onLayout
-   * @param {!../../../src/preconnect.Preconnect} preconnect
-   */
-  ampPreconnectCallback(onLayout, preconnect) {
-    const {src, srcset} = this.props;
-    if (src) {
-      preconnect.url(src, onLayout);
-    } else if (srcset) {
-      // We try to find the first url in the srcset
-      const srcseturl = /\S+/.exec(srcset);
-      // Connect to the first url if it exists
-      if (srcseturl) {
-        preconnect.url(srcseturl[0], onLayout);
-      }
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout.Layout} layout
-   * @return {boolean}
-   */
-  ampIsLayoutSupported(layout) {
-    return true;
+    return React.createElement(
+      React.Fragment,
+      null,
+      sizer,
+      React.createElement('img', props)
+    );
   }
 
   /**
@@ -156,7 +139,7 @@ class AmpImg extends React.Component {
     if (sizes) {
       return sizes;
     }
-    const {'i-amphtml-layout': layout, srcset} = this.props;
+    const { 'i-amphtml-layout': layout, srcset } = this.props;
     if (layout === 'intrinsic') {
       return;
     }
@@ -165,7 +148,7 @@ class AmpImg extends React.Component {
       return;
     }
 
-    const {layoutWidth} = this.state;
+    const { layoutWidth } = this.state;
     if (!layoutWidth || layoutWidth <= this.currentSizesWidth_) {
       return this.currentSizes_;
     }
@@ -183,6 +166,10 @@ class AmpImg extends React.Component {
 
     return (this.currentSizes_ = entry + defaultSize);
   }
+}
+
+function addToClass(classes, add) {
+  return (classes || '') + ' ' + add;
 }
 
 const AmpReactImg = ReactCompatibleBaseElement(AmpImg);

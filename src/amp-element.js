@@ -19,7 +19,7 @@ import userAssert from './dev-assert.js';
 export default function AmpElementFactory(BaseElement) {
   return class AmpElement extends HTMLElement {
     constructor() {
-      super(...arguments)
+      super(...arguments);
 
       this.laidOut_ = false;
       this.isVisible_ = false;
@@ -33,7 +33,9 @@ export default function AmpElementFactory(BaseElement) {
       applyStaticLayout(this);
       this.implementation_.buildCallback();
 
-      const io = new IntersectionObserver(this.handleIntersectionObserver_.bind(this));
+      const io = new IntersectionObserver(
+        this.handleIntersectionObserver_.bind(this)
+      );
       this.intersection_ = io;
       io.observe(this, { threshold: 0 });
 
@@ -50,7 +52,9 @@ export default function AmpElementFactory(BaseElement) {
     }
 
     handleIntersectionObserver_(records) {
-      const last = records.length ? records[records.length - 1] : { isIntersecting: false };
+      const last = records.length
+        ? records[records.length - 1]
+        : { isIntersecting: false };
       const isVisible = last.isIntersecting;
 
       if (isVisible && !this.laidOut_) {
@@ -72,7 +76,7 @@ export default function AmpElementFactory(BaseElement) {
 
       this.implementation_.mutatedAttributesCallback(map);
     }
-  }
+  };
 }
 
 /** Copy paste from AMP */
@@ -327,4 +331,3 @@ function getLengthNumeral(length) {
   const res = parseFloat(length);
   return res === res ? res : undefined;
 }
-

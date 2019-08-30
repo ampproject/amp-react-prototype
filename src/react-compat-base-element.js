@@ -59,76 +59,58 @@ export default function ReactCompatibleBaseElement(Component) {
 
     /** @override */
     buildCallback() {
-      const el = ReactDOM.render(React.createElement(Component, this.attributes_()), this.element);
+      // Do this BEFORE render, to collect children which could be wiped out by
+      // the render.
+      const state = this.initialState_();
+
+      const el = ReactDOM.render(
+        React.createElement(Component, collectProps(this.element)),
+        this.element
+      );
       this.el_ = el;
-      el.setState({layoutWidth: this.getLayoutWidth(), inViewport: false});
-      this.rerender_();
+      el.setState(state);
     }
 
     /** @override */
     layoutCallback() {
       const el = devAssert(this.el_);
-      el.setState({prerender: false});
-      this.rerender_();
+      el.setState({ prerender: false });
     }
 
     /** @override */
     mutatedAttributesCallback(mutations) {
-      if (!this.el_) {
-        return;
+      // TODO
+      if (this.el_) {
+        // this.rerender_();
       }
-
-      this.rerender_();
-    }
-
-    /** @override */
-    preconnectCallback(onLayout) {
-      const el = devAssert(this.el_);
-      el.ampPreconnectCallback(onLayout, this.preconnect);
     }
 
     /** @override */
     onMeasureChanged() {
       const el = devAssert(this.el_);
-      el.setState({layoutWidth: this.getLayoutWidth()});
-      this.rerender_();
+      el.setState({ layoutWidth: this.getLayoutWidth() });
     }
 
     /** @override */
     viewportCallback(inViewport) {
       const el = devAssert(this.el_);
-      el.setState({inViewport});
-      this.rerender_();
+      el.setState({ inViewport });
     }
 
-    /**
-     * @private
-     */
-    rerender_() {
-      // While this "creates" a new element, React's diffing will not create
-      // a second instance of Component. Instead, the existing one already
-      // rendered into this element will be reusued.
-      const el = React.createElement(Component, this.attributes_());
-      ReactDOM.render(el, this.element);
-    }
-
-    /**
-     * @private
-     * @return {!Object<string, string>}
-     */
-    attributes_() {
-      const out = {};
-      const {attributes} = this.element;
-      for (let i = 0, l = attributes.length; i < l; i++) {
-        const attr = attributes[i];
-        out[attr.name] = attr.value;
+    initialState_() {
+      const sizer = domToVirtualDom(this.element.sizerElement);
+      if (sizer) {
+        this.element.removeChild(this.element.sizerElement);
       }
-      out['i-amphtml-element'] = this;
-      return out;
+
+      const children = collectChildren(this.element);
+      return {
+        sizer,
+        children,
+        layoutWidth: this.getLayoutWidth(),
+        inViewport: false,
+      };
     }
-
-
-
 
     /** Mocks of the BaseElement base class methods/props */
 
@@ -140,7 +122,7 @@ export default function ReactCompatibleBaseElement(Component) {
       return {
         getWidth() {
           return window.innerWidth;
-        }
+        },
       };
     }
 
@@ -428,4 +410,65 @@ export default function ReactCompatibleBaseElement(Component) {
   }
 
   return AmpElementFactory(ReactBaseElement);
+}
+
+function domToVirtualDom(node) {
+  if (!node) {
+    return null;
+  }
+  const { nodeType } = node;
+  if (nodeType === 3 /* TEXT */) {
+    return node.data;
+  }
+  if (nodeType !== 1 /* ELEMENT */) {
+    return null;
+  }
+
+  const props = collectProps(node);
+  const children = collectChildren(node);
+
+  return React.createElement(node.localName, props, ...children);
+}
+
+function collectProps(element) {
+  const props = {};
+  const { attributes } = element;
+  for (let i = 0, l = attributes.length; i < l; i++) {
+    const { name, value } = attributes[i];
+    if (name === 'style') {
+      props.style = collectStyle(element);
+    } else {
+      props[name] = value;
+    }
+  }
+
+  return props;
+}
+
+function collectChildren(node) {
+  const children = [];
+  for (let c = node.firstChild; c; c = c.nextSibling) {
+    children.push(domToVirtualDom(c));
+  }
+  return children;
+}
+
+function collectStyle(element) {
+  const { style } = element;
+  const styleMap = {};
+
+  for (let i = 0, l = style.length; i < l; i++) {
+    const name = style[i];
+    styleMap[dashToCamelCase(name)] = style.getPropertyValue(name);
+  }
+
+  return styleMap;
+}
+
+function toUpperCase(_match, character) {
+  return character.toUpperCase();
+}
+
+function dashToCamelCase(name) {
+  return name.replace(/-([a-z])/g, toUpperCase);
 }
