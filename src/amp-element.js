@@ -21,6 +21,9 @@ export default function AmpElementFactory(BaseElement) {
     constructor() {
       super(...arguments);
 
+      /** @private @const {!Object} */
+      this.opts_ = BaseElement.opts() || {};
+
       this.laidOut_ = false;
       this.isVisible_ = false;
       this.implementation_ = new BaseElement(this);
@@ -33,22 +36,43 @@ export default function AmpElementFactory(BaseElement) {
       applyStaticLayout(this);
       this.implementation_.buildCallback();
 
+      // TBD: does it work here?
       const io = new IntersectionObserver(
         this.handleIntersectionObserver_.bind(this)
       );
       this.intersection_ = io;
       io.observe(this, { threshold: 0 });
 
-      const mo = new MutationObserver(this.handleMutationObserver_.bind(this));
-      this.mutations_ = mo;
-      mo.observe(this, { attributes: true });
+      const moOptions = {};
+      const opts = this.opts_;
+      if (opts.attrs) {
+        // TODO: more specific attribute filters to reduce amount of mutates.
+        moOptions['attributes'] = true;
+      }
+      if (opts.children) {
+        // TBD: this is actually not enough. Need to observe children
+        // attributes as well.
+        moOptions['childList'] = true;
+      }
+
+      if (Object.keys(moOptions).length > 0) {
+        const mo = new MutationObserver(this.handleMutationObserver_.bind(this));
+        this.mutations_ = mo;
+        mo.observe(this, moOptions);
+      }
+
+      this.mutated_();
     }
 
     disconnectedCallback() {
-      this.intersection_.disconnect();
-      this.intersection_ = null;
-      this.mutations_.disconnect();
-      this.mutations_ = null;
+      if (this.intersection_) {
+        this.intersection_.disconnect();
+        this.intersection_ = null;
+      }
+      if (this.mutations_) {
+        this.mutations_.disconnect();
+        this.mutations_ = null;
+      }
     }
 
     handleIntersectionObserver_(records) {
@@ -60,21 +84,42 @@ export default function AmpElementFactory(BaseElement) {
       if (isVisible && !this.laidOut_) {
         this.laidOut_ = true;
         this.implementation_.layoutCallback();
+        this.mutated_();
       }
       if (isVisible !== this.isVisible_) {
         this.isVisible_ = isVisible;
         this.implementation_.viewportCallback(isVisible);
+        this.mutated_();
       }
     }
 
     handleMutationObserver_(records) {
-      const map = { __proto__: null };
+      const attrs = { __proto__: null };
+      let childrenChanged = false;
       for (const r of records) {
-        const { attributeName } = r;
-        map[attributeName] = this.getAttribute(attributeName);
+        switch (r.type) {
+          case 'attributes':
+            const { attributeName } = r;
+            attrs[attributeName] = this.getAttribute(attributeName);
+            break;
+          case 'childList':
+            childrenChanged = true;
+            break;
+        }
       }
 
-      this.implementation_.mutatedAttributesCallback(map);
+      this.implementation_.mutatedAttributesCallback(attrs);
+      if (childrenChanged) {
+        this.implementation_.mutatedChildrenCallback();
+      }
+      this.mutated_();
+    }
+
+    mutated_() {
+      if (this.mutations_) {
+        // Flush mutation observer to avoid recursive mutations.
+        this.mutations_.takeRecords();
+      }
     }
   };
 }

@@ -34,9 +34,20 @@ import devAssert from './dev-assert.js';
  */
 export default function ReactCompatibleBaseElement(Component) {
   class ReactBaseElement {
+
+    /**
+     * @return {?Object|undefined}
+     */
+    static opts() {
+      return Component.opts && Component.opts();
+    }
+
     /** @param {!AmpElement} element */
     constructor(element) {
       this.element = element;
+
+      /** @private {?Node} */
+      this.container_ = null;
 
       /** @private {?Component} */
       this.el_ = null;
@@ -59,21 +70,13 @@ export default function ReactCompatibleBaseElement(Component) {
 
     /** @override */
     buildCallback() {
-      // Do this BEFORE render, to collect children which could be wiped out by
-      // the render.
-      const state = this.initialState_();
-
-      const el = ReactDOM.render(
-        React.createElement(Component, collectProps(this.element)),
-        this.element
-      );
-      this.el_ = el;
-      el.setState(state);
+      this.rerender_();
     }
 
     /** @override */
     layoutCallback() {
       const el = devAssert(this.el_);
+      // TBD: this should be a property or even maybe a context property.
       el.setState({ prerender: false });
     }
 
@@ -82,38 +85,60 @@ export default function ReactCompatibleBaseElement(Component) {
       if (!this.el_) {
         return;
       }
-      const el = ReactDOM.render(
-        React.createElement(Component, collectProps(this.element)),
-        this.element
-      );
-      devAssert(el === this.el_);
+      this.rerender_();
+    }
+
+    /** @override */
+    mutatedChildrenCallback() {
+      if (!this.el_) {
+        return;
+      }
+      this.rerender_();
     }
 
     /** @override */
     onMeasureChanged() {
       const el = devAssert(this.el_);
-      el.setState({ layoutWidth: this.getLayoutWidth() });
+      // TBD: If the component cares about its width, it has to do it
+      // independently. Otherwise, it will break React-only mode.
+      // el.setState({ layoutWidth: this.getLayoutWidth() });
     }
 
     /** @override */
     viewportCallback(inViewport) {
       const el = devAssert(this.el_);
-      el.setState({ inViewport });
+      // TBD: Ditto: if it's important for the component to know intersection
+      // with the viewport - it has to track it independently.
+      // el.setState({ inViewport });
     }
 
-    initialState_() {
-      const sizer = domToVirtualDom(this.element.sizerElement);
-      if (sizer) {
-        this.element.removeChild(this.element.sizerElement);
+    /** @private */
+    rerender_() {
+      const opts = ReactBaseElement.opts() || {};
+
+      if (!this.container_) {
+        // TBD: create container/shadow in the amp-element.js?
+        if (opts.children) {
+          this.container_ = this.element.attachShadow({mode: 'open'});
+        } else {
+          this.container_ = this.getWin().document.createElement('i-amphtml-c');
+          // TBD: we only want `position:absolute` in a few layouts really.
+          this.container_.style.position = 'absolute';
+          this.container_.style.top = '0';
+          this.container_.style.left = '0';
+          this.container_.style.right = '0';
+          this.container_.style.bottom = '0';
+          this.element.appendChild(this.container_);
+        }
       }
 
-      const children = collectChildren(this.element);
-      return {
-        sizer,
-        children,
-        layoutWidth: this.getLayoutWidth(),
-        inViewport: false,
-      };
+      const props = collectProps(this.element, opts);
+
+      // While this "creates" a new element, React's diffing will not create
+      // a second instance of Component. Instead, the existing one already
+      // rendered into this element will be reusued.
+      const v = React.createElement(Component, props);
+      this.el_ = ReactDOM.render(v, this.container_);
     }
 
     /** Mocks of the BaseElement base class methods/props */
@@ -412,45 +437,69 @@ export default function ReactCompatibleBaseElement(Component) {
   return AmpElementFactory(ReactBaseElement);
 }
 
-function domToVirtualDom(node) {
-  if (!node) {
-    return null;
-  }
-  const { nodeType } = node;
-  if (nodeType === 3 /* TEXT */) {
-    return node.data;
-  }
-  if (nodeType !== 1 /* ELEMENT */) {
-    return null;
-  }
 
-  const props = collectProps(node);
-  const children = collectChildren(node);
-
-  return React.createElement(node.localName, props, ...children);
-}
-
-function collectProps(element) {
+function collectProps(element, opts) {
+  const defs = opts.attrs || {};
   const props = {};
+
+  // Attributes.
   const { attributes } = element;
   for (let i = 0, l = attributes.length; i < l; i++) {
     const { name, value } = attributes[i];
-    if (name === 'style') {
+    const def = defs[name];
+    if (def) {
+      const v = def.type == 'number' ? Number(value) : value;
+      props[def.prop] = v;
+    } else if (name == 'style') {
       props.style = collectStyle(element);
     } else {
       props[name] = value;
     }
   }
 
+  // Children.
+  // There are plain "children" and there're slotted children assigned
+  // as separate properties. Thus in a carousel the plain "children" are
+  // slides, and the "arrowNext" children are passed via a "arrowNext"
+  // property.
+  if (opts.children) {
+    const children = [];
+    for (let i = 0; i < element.children.length; i++) {
+      const childElement = element.children[i];
+      const match = matchChild(childElement, opts.children);
+      if (!match) {
+        continue;
+      }
+      // TBD: assign keys, reuse slots, etc.
+      const list =
+        match == 'children' ?
+        children :
+        (props[match] || (props[match] = []));
+      const slot = `i-amphtml-${match}-${list.length}`;
+      childElement.setAttribute('slot', slot);
+      const child = React.createElement('slot', {name: slot});
+      list.push(child);
+    }
+    props.children = children;
+  }
+
   return props;
 }
 
-function collectChildren(node) {
-  const children = [];
-  for (let c = node.firstChild; c; c = c.nextSibling) {
-    children.push(domToVirtualDom(c));
+/**
+ * @param {!Element} element
+ * @param {!Object} defs
+ * @return {?string}
+ */
+function matchChild(element, defs) {
+  // TBD: a little slow to do this repeatedly.
+  for (const match in defs) {
+    const expr = defs[match];
+    if (element.matches(expr)) {
+      return match;
+    }
   }
-  return children;
+  return null;
 }
 
 function collectStyle(element) {
