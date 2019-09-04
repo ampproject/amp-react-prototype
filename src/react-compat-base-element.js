@@ -79,10 +79,14 @@ export default function ReactCompatibleBaseElement(Component) {
 
     /** @override */
     mutatedAttributesCallback(mutations) {
-      // TODO
-      if (this.el_) {
-        // this.rerender_();
+      if (!this.el_) {
+        return;
       }
+      const el = ReactDOM.render(
+        React.createElement(Component, collectProps(this.element)),
+        this.element
+      );
+      devAssert(el === this.el_);
     }
 
     /** @override */
@@ -389,10 +393,6 @@ export default function ReactCompatibleBaseElement(Component) {
     }
 
     expandedCallback(unusedElement) {
-      throw new Error('unimplemented');
-    }
-
-    mutatedAttributesCallback(unusedMutations) {
       throw new Error('unimplemented');
     }
 
