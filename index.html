@@ -175,6 +175,7 @@
     <script src="https://unpkg.com/react/umd/react.development.js"></script>
     <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
     <script type="module" src="./src/amp-react-img.js"></script>
+    <script type="module" src="./src/amp-react-carousel.js"></script>
   </head>
   <body>
 
@@ -187,6 +188,20 @@
       width=300
       height=90>
     </amp-react-img>
+
+    <!-- TBD: display:block is pretty important here. Whose job is to set it and when? -->
+    <amp-react-carousel
+      id="c1"
+      layout="responsive"
+      width=300
+      height=150
+      style="display: block;"
+      current-slide="1">
+      <div>slide1</div>
+      <div>slide2</div>
+      <!-- TBD: is this convenient to position buttons here? -->
+      <button arrow-next style="position: absolute; right: 8px; top: calc(50% - 16px)">&rarr;</button>
+    </amp-react-carousel>
 
     <div style="height: 500vh">scroll down...</div>
 
