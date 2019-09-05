@@ -35,14 +35,12 @@ function AmpCarouselHooks(props) {
   const [currentSlide, setCurrentSlide] = useState(currentSlideProp);
 
   // Reset currentSlide state if a property (attribute) changes.
-  // TBD: this is still very ugly! To start with: a property update causes two
-  // physical renders for no good reason.
-  useEffect(() => {
-    if (currentSlideProp != currentSlideRef.current) {
-      currentSlideRef.current = currentSlideProp;
-      setCurrentSlide(currentSlideProp);
-    }
-  }, [props.currentSlide]);
+  // TBD: this is still very ugly! To start with: a property update causes an
+  // extra virtual render for no good reason. But at least not a physical one.
+  if (currentSlideProp != currentSlideRef.current) {
+    currentSlideRef.current = currentSlideProp;
+    setCurrentSlide(currentSlideProp);
+  }
 
   const scrollerRef = useRef();
 
@@ -63,12 +61,6 @@ function AmpCarouselHooks(props) {
     const slide = Math.round(x / scroller.offsetWidth);
     setCurrentSlide(slide);
     // TBD: Dispatch the "slide-change" event. But how to do this in React?
-  }
-
-  function navHandler(dir) {
-    // TBD: the updater is probably not really useful here. It's ok to always
-    // navigate from the currently known state.
-    setCurrentSlide(currentSlide + dir);
   }
 
 
@@ -153,7 +145,9 @@ function AmpCarouselHooks(props) {
     return React.cloneElement(button, {
       // TBD: For some reason this click listener is not working on a slot.
       //      It works fine on the default button though.
-      onClick: navHandler.bind(null, dir),
+      onClick: () => {
+        setCurrentSlide(currentSlide + dir);
+      },
       // TBD: this is cute, but `[disabled]` doesn't propagate from slot to
       // the actual button.
       disabled: nextSlide < 0 || nextSlide >= slides.length,
