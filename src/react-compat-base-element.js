@@ -76,14 +76,15 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @override */
     layoutCallback() {
-      const el = devAssert(this.el_);
-      // TBD: this should be a property or even maybe a context property.
-      el.setState({ prerender: false });
+      if (this.el_) {
+        // TBD: this should be a property or even maybe a context property.
+        this.el_.setState({ prerender: false });
+      }
     }
 
     /** @override */
     mutatedAttributesCallback(mutations) {
-      if (!this.el_) {
+      if (!this.container_) {
         return;
       }
       this.rerender_();
@@ -91,7 +92,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @override */
     mutatedChildrenCallback() {
-      if (!this.el_) {
+      if (!this.container_) {
         return;
       }
       this.rerender_();
@@ -99,17 +100,17 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @override */
     onMeasureChanged() {
-      const el = devAssert(this.el_);
       // TBD: If the component cares about its width, it has to do it
       // independently. Otherwise, it will break React-only mode.
+      // const el = devAssert(this.el_);
       // el.setState({ layoutWidth: this.getLayoutWidth() });
     }
 
     /** @override */
     viewportCallback(inViewport) {
-      const el = devAssert(this.el_);
       // TBD: Ditto: if it's important for the component to know intersection
       // with the viewport - it has to track it independently.
+      // const el = devAssert(this.el_);
       // el.setState({ inViewport });
     }
 
@@ -137,6 +138,10 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // a second instance of Component. Instead, the existing one already
       // rendered into this element will be reusued.
       const v = React.createElement(Component, props);
+      // TBD: function components return `null` here and generally do not
+      // allow setting state from the outside, afaic. This is somewhat expected
+      // but causes problems for us since, in theory, we don't know whether a
+      // `Component` is a class component or a function component.
       this.el_ = ReactDOM.render(v, this.container_);
     }
 
@@ -496,6 +501,12 @@ function collectProps(element, opts) {
  * @return {?string}
  */
 function matchChild(element, defs) {
+  if (/^I-/.test(element.tagName) ||
+      element.hasAttribute('placeholder') ||
+      element.hasAttribute('fallback') ||
+      element.hasAttribute('i-amphtml')) {
+    return null;
+  }
   // TBD: a little slow to do this repeatedly.
   for (const match in defs) {
     const expr = defs[match];
