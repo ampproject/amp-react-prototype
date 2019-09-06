@@ -17,6 +17,11 @@
 import AmpElementFactory from './amp-element.js';
 import devAssert from './dev-assert.js';
 
+const {
+  useEffect,
+  useRef,
+} = React;
+
 /**
  * ReactCompatibleBaseElement is a compatibility wrapper around AMP's
  * BaseElement. It takes a Component to compose, and calls renders the
@@ -481,8 +486,12 @@ function collectProps(element, opts) {
         (props[match] || (props[match] = []));
       const slot = `i-amphtml-${match}-${list.length}`;
       childElement.setAttribute('slot', slot);
-      const child = React.createElement('slot', {name: slot});
-      list.push(child);
+      const def = opts.children[match];
+      const slotProps = Object.assign(
+        {name: slot},
+        typeof def == 'object' && def.props || {}
+      );
+      list.push(React.createElement(Slot, slotProps));
     }
     props.children = children;
   }
@@ -498,8 +507,9 @@ function collectProps(element, opts) {
 function matchChild(element, defs) {
   // TBD: a little slow to do this repeatedly.
   for (const match in defs) {
-    const expr = defs[match];
-    if (element.matches(expr)) {
+    const def = defs[match];
+    const selector = typeof def == 'string' ? def : def.selector;
+    if (element.matches(selector)) {
       return match;
     }
   }
@@ -528,4 +538,36 @@ function toUpperCase(_match, character) {
 
 function dashToCamelCase(name) {
   return name.replace(/-([a-z])/g, toUpperCase);
+}
+
+function Slot(props) {
+  const ref = useRef();
+  const slotProps = Object.assign({}, props, {ref});
+  useEffect(() => {
+    const slot = ref.current;
+
+    // Retarget slots and content.
+    if (props.retarget) {
+      // TBD: retargetting here is for:
+      // 1. `disabled` doesn't apply inside subtrees. This makes it more like
+      //    `hidden`.
+      // 2. re-propagate events to slots since React stops propagation.
+      const disabled = slot.hasAttribute('disabled');
+      slot.assignedNodes().forEach(node => {
+        node.disabled = disabled;
+        if (!node['i-amphtml-event-distr']) {
+          node['i-amphtml-event-distr'] = true;
+          node.addEventListener('click', () => {
+            const event = new Event('click', {
+              bubbles: true,
+              cancelable: true,
+              composed: false,
+            });
+            slot.dispatchEvent(event);
+          });
+        }
+      });
+    }
+  });
+  return React.createElement('slot', slotProps);
 }
