@@ -30,16 +30,17 @@ import devAssert from './dev-assert.js';
  * provide compatibilty between CE and React.
  *
  * @param {!React.Component} Component
+ * @param {!AmpElementOptions} opts
  * @return {Amp.BaseElement}
  */
-export default function ReactCompatibleBaseElement(Component) {
+export default function ReactCompatibleBaseElement(Component, opts) {
   class ReactBaseElement {
 
     /**
      * @return {?Object|undefined}
      */
     static opts() {
-      return Component.opts && Component.opts();
+      return opts;
     }
 
     /** @param {!AmpElement} element */
@@ -114,8 +115,6 @@ export default function ReactCompatibleBaseElement(Component) {
 
     /** @private */
     rerender_() {
-      const opts = ReactBaseElement.opts() || {};
-
       if (!this.container_) {
         // TBD: create container/shadow in the amp-element.js?
         if (opts.children) {
@@ -438,6 +437,11 @@ export default function ReactCompatibleBaseElement(Component) {
 }
 
 
+/**
+ * @param {!Element} element
+ * @param {!AmpElementOptions} opts
+ * @return {!Object}
+ */
 function collectProps(element, opts) {
   const defs = opts.attrs || {};
   const props = {};
@@ -502,6 +506,10 @@ function matchChild(element, defs) {
   return null;
 }
 
+/**
+ * @param {!Element} element
+ * @return {!Object}
+ */
 function collectStyle(element) {
   const { style } = element;
   const styleMap = {};
