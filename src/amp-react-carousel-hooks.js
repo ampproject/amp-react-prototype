@@ -16,6 +16,7 @@
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {useStateFromProp} from './amp-react-utils.js';
+import {withAmpContext} from './amp-context.js';
 
 const {
   useEffect,
@@ -105,7 +106,13 @@ export function AmpCarouselHooks(props) {
         justifyContent: 'center',
         scrollSnapAlign: 'start',
       };
-      return React.createElement('div', outs, child);
+      return React.createElement(
+        withAmpContext,
+        {
+          renderable: index == currentSlide,
+        },
+        React.createElement('div', outs, child)
+      );
     });
 
     return React.createElement('div', outs, slideElements);
