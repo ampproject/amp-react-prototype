@@ -116,18 +116,13 @@ class AmpImg extends React.Component {
       'i-amphtml-fill-content i-amphtml-replaced-content'
     );
 
-    const { prerender, sizer } = this.state;
+    const { prerender } = this.state;
     if (prerender && !this.prerenderAllowed_) {
       delete props['src'];
       delete props['srcset'];
     }
 
-    return React.createElement(
-      React.Fragment,
-      null,
-      sizer,
-      React.createElement('img', props)
-    );
+    return React.createElement('img', props);
   }
 
   /**
