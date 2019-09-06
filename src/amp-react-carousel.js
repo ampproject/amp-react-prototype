@@ -217,8 +217,14 @@ const AmpReactCarousel = ReactCompatibleBaseElement(AmpCarousel, {
     },
   },
   children: {
-    'arrowNext': '[arrow-next]',
-    'arrowPrev': '[arrow-prev]',
+    'arrowNext': {
+      selector: '[arrow-next]',
+      props: {retarget: true},
+    },
+    'arrowPrev': {
+      selector: '[arrow-prev]',
+      props: {retarget: true},
+    },
     'children': '*',
   },
 });
