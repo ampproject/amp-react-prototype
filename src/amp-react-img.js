@@ -172,5 +172,5 @@ function addToClass(classes, add) {
   return (classes || '') + ' ' + add;
 }
 
-const AmpReactImg = ReactCompatibleBaseElement(AmpImg);
+const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {});
 customElements.define('amp-react-img', AmpReactImg);

@@ -23,26 +23,6 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 class AmpCarousel extends React.Component {
 
   /**
-   * @return {!Object}
-   */
-  static opts() {
-    return {
-      attrs: {
-        'current-slide': {
-          prop: 'currentSlide',
-          type: 'number',
-        },
-      },
-      children: {
-        'arrowNext': '[arrow-next]',
-        'arrowPrev': '[arrow-prev]',
-        'children': '*',
-      },
-      shadow: true,
-    };
-  }
-
-  /**
    * @param {!Object} props
    */
   constructor(props) {
@@ -229,5 +209,17 @@ class AmpCarousel extends React.Component {
   }
 }
 
-const AmpReactCarousel = ReactCompatibleBaseElement(AmpCarousel);
+const AmpReactCarousel = ReactCompatibleBaseElement(AmpCarousel, {
+  attrs: {
+    'current-slide': {
+      prop: 'currentSlide',
+      type: 'number',
+    },
+  },
+  children: {
+    'arrowNext': '[arrow-next]',
+    'arrowPrev': '[arrow-prev]',
+    'children': '*',
+  },
+});
 customElements.define('amp-react-carousel', AmpReactCarousel);
