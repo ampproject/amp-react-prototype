@@ -167,7 +167,7 @@ function AmpCarouselHooks(props) {
   ]);
 }
 
-AmpCarouselHooks.opts = {
+const AmpReactCarouselHooks = ReactCompatibleBaseElement(AmpCarouselHooks, {
   attrs: {
     'current-slide': {
       prop: 'currentSlide',
@@ -179,7 +179,5 @@ AmpCarouselHooks.opts = {
     'arrowPrev': '[arrow-prev]',
     'children': '*',
   },
-};
-
-const AmpReactCarouselHooks = ReactCompatibleBaseElement(AmpCarouselHooks);
+});
 customElements.define('amp-react-carousel-hooks', AmpReactCarouselHooks);
