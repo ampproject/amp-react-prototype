@@ -582,7 +582,12 @@ function Slot(props) {
         node.hidden = slot.hasAttribute('hidden');
         if (!node['i-amphtml-event-distr']) {
           node['i-amphtml-event-distr'] = true;
-          node.addEventListener('click', () => {
+          node.addEventListener('click', e => {
+            // Stop propagation on the original event to avoid deliving this
+            // event twice with frameworks that correctly work with composed
+            // boundaries.
+            e.stopPropagation();
+            e.preventDefault();
             const event = new Event('click', {
               bubbles: true,
               cancelable: true,
