@@ -570,7 +570,7 @@ function Slot(props) {
         for (let i = 0, l = attributes.length; i < l; i++) {
           const { name, value } = attributes[i];
           if (name == 'name') {
-            // This is slot's name.
+            // This is the slot's name.
           } else if (!node.hasAttribute(name)) {
             // TBD: this means that attributes can be rendered only once?
             // TBD: what do we do with style and class?
