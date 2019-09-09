@@ -561,11 +561,24 @@ function Slot(props) {
     if (props.retarget) {
       // TBD: retargetting here is for:
       // 1. `disabled` doesn't apply inside subtrees. This makes it more like
-      //    `hidden`.
+      //    `hidden`. Similarly do other attributes.
       // 2. re-propagate events to slots since React stops propagation.
-      const disabled = slot.hasAttribute('disabled');
       slot.assignedNodes().forEach(node => {
-        node.disabled = disabled;
+        // Basic attributes:
+        const { attributes } = slot;
+        for (let i = 0, l = attributes.length; i < l; i++) {
+          const { name, value } = attributes[i];
+          if (name == 'name') {
+            // This is slot's name.
+          } else if (!node.hasAttribute(name)) {
+            // TBD: this means that attributes can be rendered only once?
+            // TBD: what do we do with style and class?
+            node.setAttribute(name, value);
+          }
+        }
+        // Boolean attributes:
+        node.disabled = slot.hasAttribute('disabled');
+        node.hidden = slot.hasAttribute('hidden');
         if (!node['i-amphtml-event-distr']) {
           node['i-amphtml-event-distr'] = true;
           node.addEventListener('click', () => {
