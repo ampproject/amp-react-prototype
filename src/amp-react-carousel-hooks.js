@@ -15,6 +15,7 @@
  */
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
+import {useStateFromProp} from './amp-react-utils.js';
 
 const {
   useEffect,
@@ -30,17 +31,7 @@ const {
 function AmpCarouselHooks(props) {
   const slides = props.children || [];
 
-  const currentSlideProp = props.currentSlide || 0;
-  const currentSlideRef = useRef(currentSlideProp);
-  const [currentSlide, setCurrentSlide] = useState(currentSlideProp);
-
-  // Reset currentSlide state if a property (attribute) changes.
-  // TBD: this is still very ugly! To start with: a property update causes an
-  // extra virtual render for no good reason. But at least not a physical one.
-  if (currentSlideProp != currentSlideRef.current) {
-    currentSlideRef.current = currentSlideProp;
-    setCurrentSlide(currentSlideProp);
-  }
+  const [currentSlide, setCurrentSlide] = useStateFromProp(props.currentSlide, 0);
 
   const scrollerRef = useRef();
 
@@ -160,6 +151,7 @@ function AmpCarouselHooks(props) {
       overflow: 'hidden',
       height: '100px',
     },
+    'last-used-slide': currentSlide,
   }, [
     scroller(),
     arrow(-1),
