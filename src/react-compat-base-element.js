@@ -562,7 +562,8 @@ function Slot(props) {
       // TBD: retargetting here is for:
       // 1. `disabled` doesn't apply inside subtrees. This makes it more like
       //    `hidden`. Similarly do other attributes.
-      // 2. re-propagate events to slots since React stops propagation.
+      // 2. Re-propagate click events to slots since React stops propagation.
+      //    See https://github.com/facebook/react/issues/9242.
       slot.assignedNodes().forEach(node => {
         // Basic attributes:
         const { attributes } = slot;
