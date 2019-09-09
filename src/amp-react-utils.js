@@ -26,10 +26,9 @@ const {
  * - Updated independently of the property when property is unchaged;
  * - Reset to the new property value when the property is updated.
  */
-export function useStateFromProp(prop, opt_def) {
-  const ini = prop != null ? prop : opt_def;
-  const valueRef = useRef(ini);
-  const prevPropRef = useRef(ini);
+export function useStateFromProp(prop) {
+  const valueRef = useRef(prop);
+  const prevPropRef = useRef(prop);
   const [unusedCounter, setCounter] = useState(0);
   if (!Object.is(prop, prevPropRef.current)) {
     valueRef.current = prevPropRef.current = prop;

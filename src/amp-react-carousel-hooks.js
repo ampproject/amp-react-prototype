@@ -31,7 +31,8 @@ const {
 function AmpCarouselHooks(props) {
   const slides = props.children || [];
 
-  const [currentSlide, setCurrentSlide] = useStateFromProp(props.currentSlide, 0);
+  const [currentSlide, setCurrentSlide] =
+    useStateFromProp(props.currentSlide || 0);
 
   const scrollerRef = useRef();
 
@@ -151,7 +152,8 @@ function AmpCarouselHooks(props) {
       overflow: 'hidden',
       height: '100px',
     },
-    'last-used-slide': currentSlide,
+    // Just for debugging.
+    'debug-current-slide': currentSlide,
   }, [
     scroller(),
     arrow(-1),
