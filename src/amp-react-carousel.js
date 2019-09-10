@@ -20,7 +20,7 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-class AmpCarousel extends React.Component {
+export class AmpCarousel extends React.Component {
 
   /**
    * @param {!Object} props

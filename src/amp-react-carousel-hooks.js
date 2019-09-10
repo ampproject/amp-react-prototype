@@ -28,7 +28,7 @@ const {
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-function AmpCarouselHooks(props) {
+export function AmpCarouselHooks(props) {
   const slides = props.children || [];
 
   const [currentSlide, setCurrentSlide] =
@@ -61,6 +61,7 @@ function AmpCarouselHooks(props) {
   // Creates scroller element with `overflow-x: auto`.
   const scroller = () => {
     const outs = {
+      key: 'container',
       ref: scrollerRef,
       onScroll: scrollHandler,
     };
@@ -86,9 +87,11 @@ function AmpCarouselHooks(props) {
 
     // All slides are rendered inside the scroller. It's absolutely
     // unimportant whether they are slots or actual children.
-    const slideElements = slides.map(child => {
+    const slideElements = slides.map((child, index) => {
       // TBD: assign keys.
-      const outs = {};
+      const outs = {
+        key: `slide-${index}`,
+      };
       outs['style'] = {
         boxSizing: 'border-box',
         flex: '0 0 100%',
@@ -111,7 +114,8 @@ function AmpCarouselHooks(props) {
   // Navigation arrows.
   const arrow = dir => {
     let button;
-    const arrowInProps = props[`arrow${dir < 0 ? 'Prev' : 'Next'}`];
+    const arrowName = `arrow${dir < 0 ? 'Prev' : 'Next'}`;
+    const arrowInProps = props[arrowName];
     if (arrowInProps && arrowInProps.length > 0) {
       // A button is passed in the properties: `arrowNext` or `arrowPrev`.
       button = arrowInProps[0];
@@ -135,6 +139,7 @@ function AmpCarouselHooks(props) {
 
     const nextSlide = currentSlide + dir;
     return React.cloneElement(button, {
+      key: arrowName,
       // TBD: For some reason this click listener is not working on a slot.
       //      It works fine on the default button though.
       onClick: () => {
