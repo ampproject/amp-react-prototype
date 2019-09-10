@@ -6,15 +6,18 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 
   <script src="https://unpkg.com/react/umd/react.development.js"></script>
-  <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
     import {AmpImg} from './src/amp-react-img.js';
     import {AmpCarouselHooks} from './src/amp-react-carousel-hooks.js';
+    import {AmpLightbox} from './src/amp-react-lightbox.js';
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutubeHooks} from './src/amp-react-youtube-hooks.js';
     window.AmpImg = AmpImg;
     window.AmpCarousel = AmpCarouselHooks;
+    window.AmpLightbox = AmpLightbox;
     window.AmpSize = AmpSize;
     window.AmpYoutubeHooks = AmpYoutubeHooks;
   </script>
@@ -28,11 +31,75 @@
 class App extends React.Component {
   state = {
     slides: [0, 1, 2, 3, 4, 5],
+    lightbox1Open: false,
   };
 
+  constructor(props) {
+    super(props);
+    this.backButtonService = new BackButtonServiceFake();
+    this.buttonRef = React.createRef();
+  }
+
   render() {
+    const lightbox1BlockedMessage =
+      'This lightbox has unsaved changes. Are you sure you want to close it?';
     return (
       <main>
+        <ReactRouterDOM.BrowserRouter>
+          <ReactRouterDOM.Route>
+            {props => (
+              <AmpLightbox
+                  history={props.history}
+                  routerProps={props}
+                  id="lightbox1"
+                  open={this.state.lightbox1Open}
+                  onClose={() => this.setState({lightbox1Open: false})}
+                  closeConfirm={this.state.lightbox1Blocked && lightbox1BlockedMessage}
+                  deps={{backButton: this.backButtonService}}
+                  // TBD: no way to inject ref.current instead? No re-render
+                  // on hydration...
+                  transitionAnchor={this.buttonRef}
+                  >
+                <div>This is a lightbox</div>
+
+                <AmpImg
+                    id="l1_img1"
+                    alt="bindable"
+                    src="https://via.placeholder.com/90x90.png?text=lightbox1-1"
+                    style={{width: '90px', height: '90px'}}>
+                </AmpImg>
+
+                <form
+                    onChange={() => this.setState({lightbox1Blocked: true})}
+                    onReset={() => this.setState({lightbox1Blocked: false})}
+                    >
+                  <textarea rows="5" cols="10"></textarea>
+                  <input type="checkbox"/>
+                  <input type="reset" value="Reset"/>
+                </form>
+
+                <div style={{height: '500vh'}}>scroll down...</div>
+
+                <AmpImg
+                    id="l1_img2"
+                    alt="bindable"
+                    src="https://via.placeholder.com/90x90.png?text=lightbox1-2"
+                    style={{width: '90px', height: '90px'}}>
+                </AmpImg>
+              </AmpLightbox>
+            )}
+          </ReactRouterDOM.Route>
+        </ReactRouterDOM.BrowserRouter>
+
+        <div>
+          <button
+              ref={this.buttonRef} 
+              onClick={() => this.setState({lightbox1Open: true})}>
+            Show lightbox
+          </button>
+        </div>
+
+
         <h1>amp-react-img</h1>
         <AmpImg
           id="first"
@@ -92,8 +159,53 @@ class App extends React.Component {
   }
 }
 
-ReactDOM.render(<App/>, document.getElementById('app'))
 
+// TODO: redo this service via Router.history object.
+class BackButtonServiceFake {
+  /** @return BackButtonMarker */
+  push() {
+    return new BackButtonMarkerFake();
+  }
+}
+
+class BackButtonMarkerFake {
+  constructor() {
+    this.closed = false;
+    /** @type {?function()} */
+    this.onPop = null;
+
+    /** @private {boolean} */
+    this.popped_ = false;
+    this.popHandler_ = () => {
+      this.popped_ = true;
+      this.pop();
+    };
+    window.addEventListener('popstate', this.popHandler_);
+    history.pushState({index: 1}, '');
+  }
+
+  pop() {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+    if (this.onPop) {
+      this.onPop();
+      this.onPop = null;
+    }
+    if (!this.popped_) {
+      this.popped_ = true;
+      history.go(-1);
+    }
+    if (this.popHandler_) {
+      window.removeEventListener('popstate', this.popHandler_);
+      this.popHandler_ = null;
+    }
+  }
+}
+
+
+ReactDOM.render(<App/>, document.getElementById('app'))
 </script>
 </body>
 </html>

@@ -36,6 +36,9 @@ export function useStateFromProp(prop) {
   }
   return [
     valueRef.current,
+    // TBD/TODO: make a stable function. Per React's docs:
+    // "React guarantees that setState function identity is stable and won't
+    // change on re-renders."
     function set(value) {
       if (!Object.is(value, valueRef.current)) {
         valueRef.current = value;
