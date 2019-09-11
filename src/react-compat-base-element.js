@@ -133,6 +133,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     /** @private */
     scheduleRender_() {
       if (!this.renderScheduled_) {
+        this.renderScheduled_ = true;
         requestAnimationFrame(() => {
           this.renderScheduled_ = false;
           this.rerender_();
