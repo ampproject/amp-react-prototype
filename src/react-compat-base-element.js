@@ -60,7 +60,13 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       /** @private {?Node} */
       this.container_ = null;
 
-      this.customProps_ = {};
+      /** @private {!Object} */
+      this.customProps_ = {'_load': 'manual'};
+
+      /** @private {!Object} */
+      this.exports_ = {};
+      /** @private {!Object<string, {promise: !Promise, resolver: function()}>} */
+      this.exportWaits_ = {};
 
       /** @private {?Component} */
       this.el_ = null;
@@ -109,7 +115,8 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     /** @override */
     layoutCallback() {
       this.context_.renderable = true;
-      this.scheduleRender_();
+      this.mutateProps({'_load': 'auto'});
+      return this.waitForExport_('loadPromise');
     }
 
     /** @override */
@@ -178,7 +185,11 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         }
       }
 
-      const props = {...collectProps(this.element, opts), ...this.customProps_};
+      const props = {
+        ...collectProps(this.element, opts),
+        ...this.customProps_,
+        '_exporter': this.exporter_.bind(this),
+      };
 
       // While this "creates" a new element, React's diffing will not create
       // a second instance of Component. Instead, the existing one already
@@ -193,6 +204,40 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // but causes problems for us since, in theory, we don't know whether a
       // `Component` is a class component or a function component.
       this.el_ = ReactDOM.render(v, this.container_);
+    }
+
+    /**
+     * @param {!Object} exports
+     * @private
+     */
+    exporter_(exports) {
+      Object.assign(this.exports_, exports);
+      for (const k in exports) {
+        if (k in this.exportWaits_) {
+          this.exportWaits_[k].resolver(exports[k]);
+        }
+      }
+      // Debug only.
+      this.element.setAttribute('debug-exports', JSON.stringify(this.exports_));
+    }
+
+    /**
+     * @param {string} name
+     * @return {!Promise}
+     * @private
+     */
+    waitForExport_(name) {
+      if (name in this.exportWaits_) {
+        return this.exportWaits_[name].promise;
+      }
+      const r = this.exportWaits_[name] = {};
+      r.promise = new Promise(resolve => {
+        r.resolver = resolve;
+      });
+      if (name in this.exports_) {
+        r.resolver(this.exports_[name]);
+      }
+      return r.promise;
     }
 
     /** Mocks of the BaseElement base class methods/props */
@@ -496,15 +541,23 @@ export default function ReactCompatibleBaseElement(Component, opts) {
  * @return {!Object}
  */
 function collectProps(element, opts) {
-  const defs = opts.attrs || {};
   const props = {};
 
+  // Class.
+  if (opts.className) {
+    props['className'] = opts.className;
+  }
+
   // Attributes.
-  const { attributes } = element;
-  for (let i = 0, l = attributes.length; i < l; i++) {
-    const { name, value } = attributes[i];
+  const defs = opts.attrs || {};
+  for (const name in defs) {
     const def = defs[name];
-    if (def) {
+    const value = element.getAttribute(name);
+    if (value == null) {
+      if (def.default != null) {
+        props[def.prop] = def.default;
+      }
+    } else {
       const v =
         def.type == 'number' ?
         Number(value) :
@@ -514,12 +567,6 @@ function collectProps(element, opts) {
         {current: element.getRootNode().getElementById(value)} :
         value;
       props[def.prop] = v;
-    } else if (name == 'class') {
-      props.className = value;
-    } else if (name == 'style') {
-      props.style = collectStyle(element);
-    } else {
-      props[name] = value;
     }
   }
 

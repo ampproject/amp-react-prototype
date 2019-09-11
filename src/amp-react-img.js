@@ -18,160 +18,82 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   AmpContext,
 } from './amp-context.js';
+import {
+  cleanProps,
+  useLoadEffect,
+} from './amp-react-utils.js';
 
-/**
- * @param {!Object<string, *>} props
- * @param {!Array<string>} keys
- * @return {!Object<string, *>}
- */
-function pick(props, keys) {
-  const out = {};
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const value = props[key];
-    if (value !== undefined) {
-      out[key] = value;
-    }
-  }
-
-  return out;
-}
+const {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} = React;
 
 /**
  * @return {boolean}
  */
 function testSrcsetSupport() {
-  const support = 'srcset' in new Image();
+  const support = 'srcset' in Image.prototype;
   testSrcsetSupport = () => support;
   return support;
 }
 
 /**
- * @param {string|undefined} src
- * @param {string|undefined} srcset
+ * @param {!Object} props
  * @return {string|undefined}
  */
-function guaranteeSrcForSrcsetUnsupportedBrowsers(src, srcset) {
+function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
+  const {src, srcSet} = props;
   if (src !== undefined || testSrcsetSupport()) {
     return src;
   }
-  const match = /\S+/.exec(srcset);
+  const match = /\S+/.exec(srcSet);
   return match ? match[0] : undefined;
 }
-
-const ATTRIBUTES_TO_PROPAGATE = [
-  'alt',
-  'title',
-  'referrerpolicy',
-  'aria-label',
-  'aria-describedby',
-  'aria-labelledby',
-  'srcset',
-  'src',
-  'sizes',
-];
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-export class AmpImg extends React.Component {
-  /**
-   * @param {!Object} props
-   */
-  constructor(props) {
-    super(props);
+export function AmpImg(props) {
+  const outs = cleanProps(props);
 
-    this.state = {
-      prerender: true,
-      element: props['i-amphtml-element'],
-      layoutWidth: 0,
-    };
+  const imageRef = useRef();
+  outs['ref'] = imageRef;
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = !!props['noprerender'];
+  outs['decoding'] = 'async';
+  outs['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(props);
 
-    /** @private {number} */
-    this.currentSizesWidth_ = 0;
+  // TBD: Can this at all be provided outside of AMP? Access to Viewport
+  // limits the functionality of this element independently.
+  // outs['sizes'] = this.maybeGenerateSizes_(props['sizes']);
 
-    /** @private {string|undefined} */
-    this.currentSizes_ = undefined;
-  }
-
-  /**
-   * @return {*}
-   */
-  render() {
-    const context = this.context;
-
-    const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
-
-    const { id } = this.props;
-    if (id) {
-      props['amp-img-id'] = id;
+  // TBD: To be assigned by the affect.
+  delete outs['src'];
+  delete outs['srcSet'];
+  useLoadEffect(props, () => {
+    const {src, srcSet} = props;
+    const img = imageRef.current;
+    if (src) {
+      img.setAttribute('src', src);
     }
-    props['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(
-      props['src'],
-      props['srcset']
-    );
-    props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
-    props['decoding'] = 'async';
-    props['className'] = 'i-amphtml-fill-content i-amphtml-replaced-content';
-
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (!context.renderable) {
-      delete props['src'];
-      delete props['srcset'];
+    if (srcSet) {
+      img.setAttribute('srcset', srcSet);
     }
+    return new Promise(resolve => {
+      img.onload = resolve;
+    });
+  });
 
-    return React.createElement('img', props);
-  }
-
-  /**
-   * @param {string|undefined} sizes
-   * @return {string|undefined}
-   * @private
-   */
-  maybeGenerateSizes_(sizes) {
-    if (sizes) {
-      return sizes;
-    }
-    const { 'i-amphtml-layout': layout, srcset } = this.props;
-    if (layout === 'intrinsic') {
-      return;
-    }
-
-    if (!srcset || /[0-9]+x(?:,|$)/.test(srcset)) {
-      return;
-    }
-
-    const { layoutWidth } = this.state;
-    if (!layoutWidth || layoutWidth <= this.currentSizesWidth_) {
-      return this.currentSizes_;
-    }
-    this.currentSizesWidth_ = layoutWidth;
-
-    const viewportWidth = this.state.element.getViewport().getWidth();
-
-    const entry = `(max-width: ${viewportWidth}px) ${layoutWidth}px, `;
-    let defaultSize = layoutWidth + 'px';
-
-    if (layout !== 'fixed') {
-      const ratio = Math.round((layoutWidth * 100) / viewportWidth);
-      defaultSize = Math.max(ratio, 100) + 'vw';
-    }
-
-    return (this.currentSizes_ = entry + defaultSize);
-  }
+  return React.createElement('img', outs);
 }
 
-AmpImg.contextType = AmpContext;
-
-function addToClass(classes, add) {
-  return (classes || '') + ' ' + add;
-}
-
-const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {});
+const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
+  className: 'i-amphtml-fill-content i-amphtml-replaced-content',
+  attrs: {
+    'src': {prop: 'src'},
+    'srcset': {prop: 'srcSet'},
+  },
+});
 customElements.define('amp-react-img', AmpReactImg);
