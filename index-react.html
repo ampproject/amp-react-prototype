@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AMP React in React by React</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+  <script type="module">
+    import {AmpImg} from './src/amp-react-img.js';
+    import {AmpCarouselHooks} from './src/amp-react-carousel-hooks.js';
+    window.AmpImg = AmpImg;
+    window.AmpCarousel = AmpCarouselHooks;
+  </script>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+class App extends React.Component {
+  state = {
+    slides: [0, 1, 2, 3, 4, 5],
+  };
+
+  render() {
+    return (
+      <main>
+        <h1>amp-react-img</h1>
+        <AmpImg
+          id="first"
+          alt="preact img"
+          srcset="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
+          style={{width: '300px', height: '90px'}}
+          >
+        </AmpImg>
+
+        <AmpCarousel
+          id="c1"
+          style={{width: '300px', height: '150px'}}
+          currentSlide={1}
+          arrowNext={[(
+            <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
+          )]}
+          >
+          {this.state.slides.map(index => (
+            <div key={`slide-${index}`}>
+              slide{index}
+              <AmpImg
+                id={`c1_slide${index}_img`}
+                alt="bindable"
+                src={`https://via.placeholder.com/90x90.png?text=slide${index}`}
+                style={{width: '90px', height: '90px'}}
+                >
+              </AmpImg>
+            </div>
+          ))}
+        </AmpCarousel>
+
+        <div style={{margin: '8px 0'}}>
+          <button onClick={() => this.setState({slides: [-1, 0, 1, 2, 3, 4, 5]})}>Add slide</button>
+          <button onClick={() => this.setState({slides: [1, 2, 3, 4, 5]})}>Remove slide</button>
+        </div>
+
+        <div style={{height: '500vh'}}>scroll down...</div>
+        <AmpImg
+          id="last"
+          alt="preact img"
+          srcset="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
+          style={{width: '300px', height: '90px'}}
+          >
+        </AmpImg>
+      </main>
+    )
+  }
+}
+
+ReactDOM.render(<App/>, document.getElementById('app'))
+
+</script>
+</body>
+</html>

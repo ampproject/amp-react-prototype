@@ -72,7 +72,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-class AmpImg extends React.Component {
+export class AmpImg extends React.Component {
   /**
    * @param {!Object} props
    */
@@ -111,8 +111,7 @@ class AmpImg extends React.Component {
     );
     props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
     props['decoding'] = 'async';
-    props['class'] = addToClass(
-      this.props.class,
+    props['className'] = addToClass(
       'i-amphtml-fill-content i-amphtml-replaced-content'
     );
 

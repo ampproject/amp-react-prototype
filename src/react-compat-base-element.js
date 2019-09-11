@@ -464,6 +464,8 @@ function collectProps(element, opts) {
     if (def) {
       const v = def.type == 'number' ? Number(value) : value;
       props[def.prop] = v;
+    } else if (name == 'class') {
+      props.className = value;
     } else if (name == 'style') {
       props.style = collectStyle(element);
     } else {
