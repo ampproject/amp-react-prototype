@@ -61,7 +61,13 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       /** @private {?Node} */
       this.container_ = null;
 
-      this.customProps_ = {};
+      /** @private {!Object} */
+      this.customProps_ = {'_load': 'manual'};
+
+      /** @private {!Object} */
+      this.exports_ = {};
+      /** @private {!Object<string, {promise: !Promise, resolver: function()}>} */
+      this.exportWaits_ = {};
 
       this.win = self;
 
@@ -113,6 +119,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       this.context_.renderable = true;
       this.context_.playable = true;
       this.scheduleRender_();
+      return this.waitForExport_('loadPromise');
     }
 
     /** @override */
@@ -190,6 +197,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       const props = {
         ...collectProps(this.element, opts),
         ...this.customProps_,
+        '_exporter': this.exporter_.bind(this),
       };
 
       // While this "creates" a new element, React's diffing will not create
@@ -201,6 +209,40 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       const v = preact.createElement(withAmpContext, context, cv);
 
       preact.render(v, this.container_);
+    }
+
+    /**
+     * @param {!Object} exports
+     * @private
+     */
+    exporter_(exports) {
+      Object.assign(this.exports_, exports);
+      for (const k in exports) {
+        if (k in this.exportWaits_) {
+          this.exportWaits_[k].resolver(exports[k]);
+        }
+      }
+      // Debug only.
+      this.element.setAttribute('debug-exports', JSON.stringify(this.exports_));
+    }
+
+    /**
+     * @param {string} name
+     * @return {!Promise}
+     * @private
+     */
+    waitForExport_(name) {
+      if (name in this.exportWaits_) {
+        return this.exportWaits_[name].promise;
+      }
+      const r = this.exportWaits_[name] = {};
+      r.promise = new Promise(resolve => {
+        r.resolver = resolve;
+      });
+      if (name in this.exports_) {
+        r.resolver(this.exports_[name]);
+      }
+      return r.promise;
     }
 
     /** Mocks of the BaseElement base class methods/props */

@@ -17,10 +17,22 @@
 import { AmpContext } from './amp-context.js';
 const {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useContext,
 } = preactHooks;
+
+
+export function cleanProps(props) {
+  const clean = {};
+  for (const k in props) {
+    if (k[0] != '_') {
+      clean[k] = props[k];
+    }
+  }
+  return clean;
+}
 
 
 /**
@@ -49,6 +61,36 @@ export function useStateFromProp(prop) {
     }];
 }
 
+
+/**
+ * @param {!Object} props
+ * @param {!Object} exports
+ */
+export function exporter(props, exports) {
+  const func = props['_exporter'];
+  if (func) {
+    func(exports);
+  }
+}
+
+
+/**
+ * @param {!Object} props
+ * @param {function():Promise} effect
+ */
+export function useLoadEffect(props, effect) {
+  // TBD: combine with a recursive AmpContext.renderable?
+  // See https://github.com/jridgewell/amp-react/pull/6
+  // const ampContext = useContext(AmpContext);
+  // return ampContext.renderable && props.load != 'manual';
+  const toLoad = props['_load'] != 'manual';
+  useLayoutEffect(() => {
+    if (toLoad) {
+      const result = effect();
+      exporter(props, {loadPromise: Promise.resolve(result)});
+    }
+  }, [toLoad]);
+}
 
 /**
  * @param {!Element} elementRef

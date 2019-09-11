@@ -20,6 +20,11 @@ import {
 } from './amp-context.js';
 import { useHasEverLoaded } from './amp-react-utils.js';
 
+const {
+  useLayoutEffect,
+  useRef,
+} = preactHooks;
+
 /**
  * @return {boolean}
  */
@@ -48,7 +53,8 @@ function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
  */
 export function AmpImg(props) {
   const renderable = useHasEverLoaded();
-  const attrs = {...props};
+  const imageRef = useRef();
+  const attrs = {...props, ref: imageRef};
 
   attrs['decoding'] = 'async';
 
@@ -58,6 +64,14 @@ export function AmpImg(props) {
     delete attrs['src'];
     delete attrs['srcSet'];
   }
+
+  useLayoutEffect(props, () => {
+    const img = imageRef.current;
+    const loadPromise = new Promise(resolve => {
+      img.onload = resolve;
+    });
+    // TBD: export load promise.
+  }, [attrs.src, attrs.srcSet]);
 
   return preact.createElement('img', attrs);
 }
