@@ -42,9 +42,9 @@ class App extends React.Component {
           id="c1"
           style={{width: '300px', height: '150px'}}
           currentSlide={1}
-          arrowNext={[(
+          arrowNext={(
             <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
-          )]}
+          )}
           >
           {this.state.slides.map(index => (
             <div key={`slide-${index}`}>

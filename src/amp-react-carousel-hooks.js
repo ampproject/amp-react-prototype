@@ -116,9 +116,9 @@ export function AmpCarouselHooks(props) {
     let button;
     const arrowName = `arrow${dir < 0 ? 'Prev' : 'Next'}`;
     const arrowInProps = props[arrowName];
-    if (arrowInProps && arrowInProps.length > 0) {
+    if (arrowInProps) {
       // A button is passed in the properties: `arrowNext` or `arrowPrev`.
-      button = arrowInProps[0];
+      button = arrowInProps;
     } else {
       // Default button.
       const outs = {};
@@ -177,10 +177,12 @@ const AmpReactCarouselHooks = ReactCompatibleBaseElement(AmpCarouselHooks, {
     'arrowNext': {
       selector: '[arrow-next]',
       props: {retarget: true},
+      single: true,
     },
     'arrowPrev': {
       selector: '[arrow-prev]',
       props: {retarget: true},
+      single: true,
     },
     'children': '*',
   },

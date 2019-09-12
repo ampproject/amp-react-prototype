@@ -486,19 +486,21 @@ function collectProps(element, opts) {
       if (!match) {
         continue;
       }
-      // TBD: assign keys, reuse slots, etc.
-      const list =
-        match == 'children' ?
-        children :
-        (props[match] || (props[match] = []));
-      const slot = `i-amphtml-${match}-${list.length}`;
-      childElement.setAttribute('slot', slot);
       const def = opts.children[match];
-      const slotProps = Object.assign(
-        {name: slot},
-        typeof def == 'object' && def.props || {}
-      );
-      list.push(React.createElement(Slot, slotProps));
+      const slotProps = typeof def == 'object' && def.props || {};
+
+      // TBD: assign keys, reuse slots, etc.
+      if (def.single) {
+        props[match] =
+          createSlot(childElement, `i-amphtml-${match}`, slotProps);
+      } else {
+        const list =
+          match == 'children' ?
+          children :
+          (props[match] || (props[match] = []));
+        list.push(createSlot(
+          childElement, `i-amphtml-${match}-${list.length}`, slotProps));
+      }
     }
     props.children = children;
   }
@@ -551,6 +553,18 @@ function toUpperCase(_match, character) {
 
 function dashToCamelCase(name) {
   return name.replace(/-([a-z])/g, toUpperCase);
+}
+
+/**
+ * @param {!Element} element
+ * @param {string} name
+ * @param {!Object|undefined} props
+ * @return {!ReactElement}
+ */
+function createSlot(element, name, props) {
+  element.setAttribute('slot', name);
+  const slotProps = Object.assign({name}, props || {});
+  return React.createElement(Slot, slotProps);
 }
 
 function Slot(props) {

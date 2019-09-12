@@ -95,9 +95,9 @@ export class AmpCarousel extends React.Component {
     const arrow = dir => {
       let button;
       const arrowInProps = this.props[`arrow${dir < 0 ? 'Prev' : 'Next'}`];
-      if (arrowInProps && arrowInProps.length > 0) {
+      if (arrowInProps) {
         // A button is passed in the properties: `arrowNext` or `arrowPrev`.
-        button = arrowInProps[0];
+        button = arrowInProps;
       } else {
         // Default button.
         const props = {};
@@ -220,10 +220,12 @@ const AmpReactCarousel = ReactCompatibleBaseElement(AmpCarousel, {
     'arrowNext': {
       selector: '[arrow-next]',
       props: {retarget: true},
+      single: true,
     },
     'arrowPrev': {
       selector: '[arrow-prev]',
       props: {retarget: true},
+      single: true,
     },
     'children': '*',
   },
