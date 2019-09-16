@@ -177,6 +177,7 @@
     <script type="module" src="./src/amp-react-img.js"></script>
     <script type="module" src="./src/amp-react-carousel.js"></script>
     <script type="module" src="./src/amp-react-carousel-hooks.js"></script>
+    <script type="module" src="./src/amp-react-size.js"></script>
     <script>
       function addSlide() {
         [c1, c2].forEach(function(carousel) {
@@ -247,6 +248,14 @@
       <button onclick="addSlide()">Add slide</button>
       <button onclick="removeSlide()">Remove slide</button>
     </div>
+
+    <amp-react-size
+      id="s1"
+      layout="responsive"
+      width=300
+      height=150
+      style="display: block;">
+    </amp-react-size>
 
     <div style="height: 500vh">scroll down...</div>
 

@@ -15,6 +15,7 @@
  */
 
 const {
+  useEffect,
   useRef,
   useState,
 } = React;
@@ -41,4 +42,53 @@ export function useStateFromProp(prop) {
         setCounter(state => state + 1);
       }
     }];
+}
+
+
+/**
+ * @param {!Element} elementRef
+ * @param {function(number, number)} callback
+ */
+export function useResizeEffect(elementRef, callback) {
+  useEffect(() => {
+    const element = elementRef.current;
+    if (window.ResizeObserver) {
+      // TBD: Is there a large cost for creating new resize observers for
+      //      each invocation? If so, we can provide a shared instance
+      //      via `useContext()`. Per related research, a single observer
+      //      could be as 8x faster.
+      //      See https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/z6ienONUb5A/F5-VcUZtBAAJ
+      //      If we do use a single observer, we will need to do a
+      //      single-observer-for-a-purpose to avoid subscribe/unsubscribe
+      //      conflicts for different needs (or implement our wrapper with
+      //      a counter).
+      const resizeObserver = new ResizeObserver(entries => {
+        const entry = entries[entries.length - 1];
+        const {width, height} = entry.contentRect;
+        callback(width, height);
+      });
+      resizeObserver.observe(element);
+      return function unmount() {
+        resizeObserver.disconnect();
+      };
+    } else {
+      // TBD: a "polyfill" can be supplied:
+      // 1. As a `useContext(ResizeObserverService)` service.
+      // 2. Always as a direct `ResizeObserver` polyfill. This could conflict
+      //    with low-polyfill environments, e.g. in a plain-Bento case.
+
+      // A dumb polyfill when nothing else is available: only handle window
+      // resizing.
+      function resizeHandler() {
+        const [width, height] = [element.offsetWidth, element.offsetHeight];
+        callback(width, height);
+      }
+      resizeHandler();
+      const win = element.ownerDocument.defaultView;
+      win.addEventListener('resize', resizeHandler);
+      return function unmount() {
+        win.removeEventListener('resize', resizeHandler);
+      };
+    }
+  }, [/* mount-only effect*/]);
 }
