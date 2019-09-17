@@ -146,7 +146,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     mutateProps(props) {
       Object.assign(this.customProps_, props);
-      this.rerender_();
+      this.scheduleRender_();
     }
 
     /** @private */
