@@ -16,9 +16,6 @@
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
-  AmpContext,
-} from './amp-context.js';
-import {
   cleanProps,
   useLoadEffect,
 } from './amp-react-utils.js';
