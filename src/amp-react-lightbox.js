@@ -69,18 +69,6 @@ export function AmpLightbox(props) {
     backButtonStateRef.current.onPop = () => setOpen(false);
   }
 
-  function closeOnEsc(e) {
-    if (e.key == 'Escape') {
-      setOpen(false);
-    }
-  }
-
-  function closeOnClick(e) {
-    if (e.target == backdropRef.current) {
-      setOpen(false);
-    }
-  }
-
   // An effect whenever the isOpen state changes.
   useEffect(() => {
     if (isOpen) {
@@ -89,6 +77,11 @@ export function AmpLightbox(props) {
         const backButtonMarker = backButtonService.push();
         backButtonMarker.onPop = () => setOpen(false);
         backButtonStateRef.current = backButtonMarker;
+      }
+      function closeOnEsc(e) {
+        if (e.key == 'Escape') {
+          setOpen(false);
+        }
       }
       document.addEventListener('keyup', closeOnEsc);
       // TODO: Transition: a pretty stupid sample code.
@@ -108,6 +101,9 @@ export function AmpLightbox(props) {
           }, {once: true});
         }, {once: true});
       }
+      return function unlisten() {
+        document.removeEventListener('keyup', closeOnEsc);
+      };
     } else {
       // Do close.
       setOpen(false);
@@ -116,7 +112,6 @@ export function AmpLightbox(props) {
         backButtonMarker.pop();
         backButtonStateRef.current = null;
       }
-      document.removeEventListener('keyup', closeOnEsc);
       if (onClose) {
         onClose();
       }
@@ -149,7 +144,11 @@ export function AmpLightbox(props) {
   const container = () => {
     const outs = {
       ref: backdropRef,
-      onClick: closeOnClick,
+      onClick: e => {
+        if (e.target == backdropRef.current) {
+          setOpen(false);
+        }
+      },
     };
     outs['style'] = {
       display: isOpen ? 'block' : 'none',
@@ -207,9 +206,6 @@ const AmpReactLightbox = ReactCompatibleBaseElement(AmpLightbox, {
     },
   },
   passthrough: true,
-  children: {
-    'children': '*',
-  },
   // TBD: do property->dep mapping instead?
   // TBD: required vs optional?
   deps: ['backButton'],
