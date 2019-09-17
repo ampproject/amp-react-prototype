@@ -17,7 +17,8 @@
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   cleanProps,
-  useLoadEffect,
+  exporter,
+  useLoadState,
 } from './amp-react-utils.js';
 
 const {
@@ -66,22 +67,26 @@ export function AmpImg(props) {
   // limits the functionality of this element independently.
   // outs['sizes'] = this.maybeGenerateSizes_(props['sizes']);
 
-  // TBD: To be assigned by the affect.
-  delete outs['src'];
-  delete outs['srcSet'];
-  useLoadEffect(props, () => {
-    const {src, srcSet} = props;
-    const img = imageRef.current;
-    if (src) {
-      img.setAttribute('src', src);
+  // TBD: Loading is done via rendering, but loading and loadPromise are
+  //      a bit separate now with more AMPy nuances visible (e.g. exporter).
+  // TBD: If we decide to do unloading as well (e.g. remove "src") this will
+  //      be even messier since layout and unlayout effects have to be separate
+  //      as well.
+  const toLoad = useLoadState(props);
+  if (!toLoad) {
+    delete outs['src'];
+    delete outs['srcSet'];
+  }
+  // TBD: In the past there were bugs where "load" even fired sync in
+  //      some cases. In this case it'd be too late to setup a listener in
+  //      a layoutEffect.
+  useLayoutEffect(() => {
+    if (toLoad) {
+      exporter({loadPromise: new Promise(resolve => {
+        imageRef.current.onload = resolve;
+      })});
     }
-    if (srcSet) {
-      img.setAttribute('srcset', srcSet);
-    }
-    return new Promise(resolve => {
-      img.onload = resolve;
-    });
-  });
+  }, [toLoad]);
 
   return React.createElement('img', outs);
 }

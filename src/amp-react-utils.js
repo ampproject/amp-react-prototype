@@ -71,7 +71,6 @@ export function exporter(props, exports) {
   }
 }
 
-
 /**
  * @param {!Object} props
  * @param {function():Promise} effect
@@ -88,6 +87,22 @@ export function useLoadEffect(props, effect) {
       exporter(props, {loadPromise: Promise.resolve(result)});
     }
   }, [toLoad]);
+}
+
+/**
+ * @param {!Object} props
+ * @param {boolean}
+ */
+export function useLoadState(props) {
+  // TBD: Combine with a recursive AmpContext.renderable?
+  //      See `useLoadEffect` notes.
+  const loadProp = props['_load'] != 'manual';
+  const [loadState, setLoadState] = useState(loadProp);
+  if (loadProp != loadState) {
+    // TBD: this will cause double-rendering, though a cheap one.
+    setLoadState(loadProp || loadState);
+  }
+  return loadProp || loadState;
 }
 
 /**
