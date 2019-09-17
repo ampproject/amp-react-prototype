@@ -15,6 +15,7 @@
  */
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
+import {withAmpContext} from './amp-context.js';
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
@@ -69,7 +70,7 @@ export class AmpCarousel extends React.Component {
 
       // All slides are rendered inside the scroller. It's absolutely
       // unimportant whether they are slots or actual children.
-      const slides = (this.props.children || []).map(child => {
+      const slides = (this.props.children || []).map((child, index) => {
         // TBD: assign keys.
         const props = {};
         props['style'] = {
@@ -85,7 +86,13 @@ export class AmpCarousel extends React.Component {
           justifyContent: 'center',
           scrollSnapAlign: 'start',
         };
-        return React.createElement('div', props, child);
+        return React.createElement(
+          withAmpContext,
+          {
+            renderable: index == this.state.currentSlide,
+          },
+          React.createElement('div', props, child)
+        );
       });
 
       return React.createElement('div', props, slides);

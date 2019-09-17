@@ -16,8 +16,13 @@
 
 import AmpElementFactory from './amp-element.js';
 import devAssert from './dev-assert.js';
+import {
+  AmpContext,
+  withAmpContext,
+} from './amp-context.js';
 
 const {
+  useContext,
   useEffect,
   useRef,
 } = React;
@@ -59,6 +64,8 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       this.el_ = null;
 
       this.win = self;
+
+      this.renderScheduled_ = false;
     }
 
     /**
@@ -76,7 +83,11 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @override */
     buildCallback() {
-      this.rerender_();
+      this.scheduleRender_();
+      this.element.addEventListener('i-amphtml-context-changed', e => {
+        e.stopPropagation();
+        this.scheduleRender_();
+      });
     }
 
     /** @override */
@@ -92,7 +103,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       if (!this.container_) {
         return;
       }
-      this.rerender_();
+      this.scheduleRender_();
     }
 
     /** @override */
@@ -100,7 +111,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       if (!this.container_) {
         return;
       }
-      this.rerender_();
+      this.scheduleRender_();
     }
 
     /** @override */
@@ -117,6 +128,17 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // with the viewport - it has to track it independently.
       // const el = devAssert(this.el_);
       // el.setState({ inViewport });
+    }
+
+    /** @private */
+    scheduleRender_() {
+      if (!this.renderScheduled_) {
+        this.renderScheduled_ = true;
+        requestAnimationFrame(() => {
+          this.renderScheduled_ = false;
+          this.rerender_();
+        });
+      }
     }
 
     /** @private */
@@ -142,7 +164,11 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // While this "creates" a new element, React's diffing will not create
       // a second instance of Component. Instead, the existing one already
       // rendered into this element will be reusued.
-      const v = React.createElement(Component, props);
+      const cv = React.createElement(Component, props);
+
+      const context = getContextFromDom(this.element);
+      const v = React.createElement(withAmpContext, context, cv);
+
       // TBD: function components return `null` here and generally do not
       // allow setting state from the outside, afaic. This is somewhat expected
       // but causes problems for us since, in theory, we don't know whether a
@@ -568,6 +594,7 @@ function createSlot(element, name, props) {
 }
 
 function Slot(props) {
+  const context = useContext(AmpContext);
   const ref = useRef();
   const slotProps = Object.assign({}, props, {ref});
   useEffect(() => {
@@ -614,6 +641,75 @@ function Slot(props) {
         }
       });
     }
+
+    const oldContext = slot['i-amphtml-context'];
+    if (!objectsEqualShallow(oldContext, context)) {
+      slot['i-amphtml-context'] = context;
+      // TODO: Switch to fast child-node discover. See Revamp for the algo.
+      const affectedNodes = [];
+      slot.assignedNodes().forEach(node => {
+        if (node.matches('.i-amphtml-element')) {
+          affectedNodes.push(node);
+        } else {
+          affectedNodes.push(...node.querySelectorAll('.i-amphtml-element'));
+        }
+      });
+      affectedNodes.forEach(node => {
+        const event = new Event('i-amphtml-context-changed', {
+          bubbles: false,
+          cancelable: true,
+          composed: true,
+        });
+        event.data = context;
+        node.dispatchEvent(event);
+      });
+    }
   });
+  // TBD: Just for debug for now. but maybe can also be used for hydration?
+  slotProps['i-amphtml-context'] = JSON.stringify(context);
   return React.createElement('slot', slotProps);
+}
+
+function getContextFromDom(node) {
+  // TBD: This can be made a lot faster using effects and dedicated context
+  // tree in AMP. See Revamp.
+
+  // Start with defaults.
+  const context = {
+    renderable: true,
+  };
+
+  // Go up the DOM hierarchy. Traverse Shadow DOM.
+  let n = node;
+  while (n) {
+    const nodeContext = n['i-amphtml-context'];
+    if (nodeContext) {
+      Object.assign(context, nodeContext);
+      break;
+    }
+    n = n.assignedSlot || n.parentNode || n.host;
+  }
+
+  return context;
+}
+
+function objectsEqualShallow(o1, o2) {
+  if (o1 === null && o2 === null ||
+      o1 === undefined && o2 === undefined) {
+    return true;
+  }
+  if (o1 == null || o2 == null) {
+    return false;
+  }
+  for (const k in o1) {
+    if (!Object.is(o1[k], o2[k])) {
+      return false;
+    }
+  }
+  for (const k in o2) {
+    if (!Object.is(o1[k], o2[k])) {
+      return false;
+    }
+  }
+  return true;
 }

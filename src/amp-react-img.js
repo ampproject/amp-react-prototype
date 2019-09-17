@@ -15,6 +15,9 @@
  */
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
+import {
+  AmpContext,
+} from './amp-context.js';
 
 /**
  * @param {!Object<string, *>} props
@@ -99,6 +102,8 @@ export class AmpImg extends React.Component {
    * @return {*}
    */
   render() {
+    const context = this.context;
+
     const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
 
     const { id } = this.props;
@@ -111,12 +116,12 @@ export class AmpImg extends React.Component {
     );
     props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
     props['decoding'] = 'async';
-    props['className'] = addToClass(
-      'i-amphtml-fill-content i-amphtml-replaced-content'
-    );
+    props['className'] = 'i-amphtml-fill-content i-amphtml-replaced-content';
 
-    const { prerender } = this.state;
-    if (prerender && !this.prerenderAllowed_) {
+    // TBD: This is just a demonstration. In reality, this doesn't work
+    // correctly since it unloads images unnecessary. The `playable` property,
+    // however, would work better in this scheme.
+    if (!context.renderable) {
       delete props['src'];
       delete props['srcset'];
     }
@@ -161,6 +166,8 @@ export class AmpImg extends React.Component {
     return (this.currentSizes_ = entry + defaultSize);
   }
 }
+
+AmpImg.contextType = AmpContext;
 
 function addToClass(classes, add) {
   return (classes || '') + ' ' + add;
