@@ -49,7 +49,7 @@ const PlayerFlags = {
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-class AmpYoutube extends React.Component {
+export class AmpYoutube extends React.Component {
   /**
    * @return {*}
    */

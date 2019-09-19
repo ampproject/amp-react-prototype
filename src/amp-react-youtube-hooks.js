@@ -49,7 +49,7 @@ const PlayerFlags = {
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-function AmpYoutubeHooks(props) {
+export function AmpYoutubeHooks(props) {
   return React.createElement(AmpContext.Consumer, null, (context) => {
     // TBD: This is just a demonstration. In reality, this doesn't work
     // correctly since it unloads images unnecessary. The `playable` property,
