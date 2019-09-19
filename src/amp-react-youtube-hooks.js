@@ -51,20 +51,20 @@ const PlayerFlags = {
  */
 function AmpYoutubeHooks(props) {
   return React.createElement(AmpContext.Consumer, null, (context) => {
+    // TBD: This is just a demonstration. In reality, this doesn't work
+    // correctly since it unloads images unnecessary. The `playable` property,
+    // however, would work better in this scheme.
+    if (!context.renderable) {
+      return null;
+    }
+
     const attrs = {
       'frameBorder': 0,
       'allowFullScreen': true,
       'allow': 'autoplay;',
       'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
+      'src': getVideoIframeSrc_(props),
     };
-
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (context.renderable) {
-      attrs['src'] = getVideoIframeSrc_(props);
-    }
-
     return React.createElement('iframe', attrs);
   });
 }

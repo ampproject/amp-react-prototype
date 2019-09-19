@@ -55,20 +55,20 @@ class AmpYoutube extends React.Component {
    */
   render() {
     const context = this.context;
+    // TBD: This is just a demonstration. In reality, this doesn't work
+    // correctly since it unloads images unnecessary. The `playable` property,
+    // however, would work better in this scheme.
+    if (!context.renderable) {
+      return null;
+    }
+
     const props = {
       'frameBorder': 0,
       'allowFullScreen': true,
       'allow': 'autoplay;',
       'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
+      'src': this.getVideoIframeSrc_(),
     };
-
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (context.renderable) {
-      props['src'] = this.getVideoIframeSrc_();
-    }
-
     return React.createElement('iframe', props);
   }
 
