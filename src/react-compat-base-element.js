@@ -66,6 +66,11 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       this.win = self;
 
       this.renderScheduled_ = false;
+
+      this.context_ = {
+        renderable: false,
+        playable: false,
+      };
     }
 
     /**
@@ -92,10 +97,8 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @override */
     layoutCallback() {
-      if (this.el_) {
-        // TBD: this should be a property or even maybe a context property.
-        this.el_.setState({ prerender: false });
-      }
+      this.context_.renderable = true;
+      this.scheduleRender_();
     }
 
     /** @override */
@@ -166,7 +169,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // rendered into this element will be reusued.
       const cv = React.createElement(Component, props);
 
-      const context = getContextFromDom(this.element);
+      const context = getContextFromDom(this.element, this.context_);
       const v = React.createElement(withAmpContext, context, cv);
 
       // TBD: function components return `null` here and generally do not
@@ -670,14 +673,9 @@ function Slot(props) {
   return React.createElement('slot', slotProps);
 }
 
-function getContextFromDom(node) {
+function getContextFromDom(node, context) {
   // TBD: This can be made a lot faster using effects and dedicated context
   // tree in AMP. See Revamp.
-
-  // Start with defaults.
-  const context = {
-    renderable: true,
-  };
 
   // Go up the DOM hierarchy. Traverse Shadow DOM.
   let n = node;

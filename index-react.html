@@ -12,9 +12,11 @@
     import {AmpImg} from './src/amp-react-img.js';
     import {AmpCarouselHooks} from './src/amp-react-carousel-hooks.js';
     import {AmpSize} from './src/amp-react-size.js';
+    import {AmpYoutubeHooks} from './src/amp-react-youtube-hooks.js';
     window.AmpImg = AmpImg;
     window.AmpCarousel = AmpCarouselHooks;
     window.AmpSize = AmpSize;
+    window.AmpYoutubeHooks = AmpYoutubeHooks;
   </script>
 </head>
 <body>
@@ -79,6 +81,12 @@ class App extends React.Component {
           style={{width: '300px', height: '90px'}}
           >
         </AmpImg>
+        <AmpYoutubeHooks
+            id="myVideo2"
+            videoid="lBTCB7yLs8Y"
+            style={{width: '358px', height: '204px'}}
+            >
+        </AmpYoutubeHooks>
       </main>
     )
   }
