@@ -18,6 +18,10 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import devAssert from './dev-assert.js';
 import { AmpContext } from './amp-context.js';
 
+const {
+  useContext,
+} = React;
+
 /**
  * @param {!Object<string, *>} props
  * @param {!Array<string>} keys
@@ -50,23 +54,22 @@ const PlayerFlags = {
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
 export function AmpYoutubeHooks(props) {
-  return React.createElement(AmpContext.Consumer, null, (context) => {
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (!context.renderable) {
-      return null;
-    }
+  const context = useContext(AmpContext);
+  // TBD: This is just a demonstration. In reality, this doesn't work
+  // correctly since it unloads images unnecessary. The `playable` property,
+  // however, would work better in this scheme.
+  if (!context.renderable) {
+    return null;
+  }
 
-    const attrs = {
-      'frameBorder': 0,
-      'allowFullScreen': true,
-      'allow': 'autoplay;',
-      'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
-      'src': getVideoIframeSrc_(props),
-    };
-    return React.createElement('iframe', attrs);
-  });
+  const attrs = {
+    'frameBorder': 0,
+    'allowFullScreen': true,
+    'allow': 'autoplay;',
+    'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
+    'src': getVideoIframeSrc_(props),
+  };
+  return React.createElement('iframe', attrs);
 }
 
 /**
