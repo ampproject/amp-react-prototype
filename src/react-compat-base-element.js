@@ -69,7 +69,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
       this.context_ = {
         renderable: false,
-        playable: true,
+        playable: false,
       };
 
       // TBD: Yep. Very ugly. See notes in `opts` decl in
@@ -111,6 +111,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     /** @override */
     layoutCallback() {
       this.context_.renderable = true;
+      this.context_.playable = true;
       this.scheduleRender_();
     }
 
