@@ -60,6 +60,8 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       /** @private {?Node} */
       this.container_ = null;
 
+      this.customProps_ = {};
+
       /** @private {?Component} */
       this.el_ = null;
 
@@ -71,6 +73,15 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         renderable: false,
         playable: false,
       };
+
+      // TBD: Yep. Very ugly. See notes in `opts` decl in
+      // `amp-react-lightbox.js`.
+      if (opts.init) {
+        const props = opts.init(this);
+        if (props) {
+          Object.assign(this.customProps_, props);
+        }
+      }
     }
 
     /**
@@ -133,6 +144,11 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // el.setState({ inViewport });
     }
 
+    mutateProps(props) {
+      Object.assign(this.customProps_, props);
+      this.scheduleRender_();
+    }
+
     /** @private */
     scheduleRender_() {
       if (!this.renderScheduled_) {
@@ -148,7 +164,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     rerender_() {
       if (!this.container_) {
         // TBD: create container/shadow in the amp-element.js?
-        if (opts.children) {
+        if (opts.children || opts.passthrough) {
           this.container_ = this.element.attachShadow({mode: 'open'});
         } else {
           this.container_ = this.getWin().document.createElement('i-amphtml-c');
@@ -162,7 +178,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         }
       }
 
-      const props = collectProps(this.element, opts);
+      const props = {...collectProps(this.element, opts), ...this.customProps_};
 
       // While this "creates" a new element, React's diffing will not create
       // a second instance of Component. Instead, the existing one already
@@ -319,10 +335,6 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       throw new Error('unimplemented');
     }
 
-    activate(unusedInvocation) {
-      throw new Error('unimplemented');
-    }
-
     activationTrust() {
       throw new Error('unimplemented');
     }
@@ -348,7 +360,9 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     }
 
     executeAction(invocation, unusedDeferred) {
-      throw new Error('unimplemented');
+      if (opts.executeAction) {
+        return opts.executeAction(this, invocation);
+      }
     }
 
     getDpr() {
@@ -491,7 +505,14 @@ function collectProps(element, opts) {
     const { name, value } = attributes[i];
     const def = defs[name];
     if (def) {
-      const v = def.type == 'number' ? Number(value) : value;
+      const v =
+        def.type == 'number' ?
+        Number(value) :
+        def.type == 'Element' ?
+        // TBD: what's the best way for element referencing compat between
+        // React and AMP? Currently modeled as a Ref.
+        {current: element.getRootNode().getElementById(value)} :
+        value;
       props[def.prop] = v;
     } else if (name == 'class') {
       props.className = value;
@@ -507,7 +528,9 @@ function collectProps(element, opts) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
-  if (opts.children) {
+  if (opts.passthrough) {
+    props.children = [React.createElement('slot')];
+  } else if (opts.children) {
     const children = [];
     for (let i = 0; i < element.children.length; i++) {
       const childElement = element.children[i];
@@ -534,7 +557,72 @@ function collectProps(element, opts) {
     props.children = children;
   }
 
+  // Dependencies.
+  // TBD: what would really happen is that we will subscribe to dependencies
+  // via revamp.
+  // TBD: direct props vs context props.
+  if (opts.deps) {
+    props.deps = {};
+    opts.deps.forEach(id => {
+      props.deps[id] = resolveDep(id);
+    });
+  }
+
   return props;
+}
+
+/**
+ * Stub implementation. This will actually be something very different.
+ * @param {!Id<T>} id
+ * @return {?T}
+ */
+function resolveDep(id) {
+  switch (id) {
+    case 'backButton':
+      class BackButtonMarkerFake {
+        constructor() {
+          this.closed = false;
+          /** @type {?function()} */
+          this.onPop = null;
+
+          /** @private {boolean} */
+          this.popped_ = false;
+          this.popHandler_ = () => {
+            this.popped_ = true;
+            this.pop();
+          };
+          window.addEventListener('popstate', this.popHandler_);
+          history.pushState({index: 1}, '');
+        }
+
+        pop() {
+          if (this.closed) {
+            return;
+          }
+          this.closed = true;
+          if (this.onPop) {
+            this.onPop();
+            this.onPop = null;
+          }
+          if (!this.popped_) {
+            this.popped_ = true;
+            history.go(-1);
+          }
+          if (this.popHandler_) {
+            window.removeEventListener('popstate', this.popHandler_);
+            this.popHandler_ = null;
+          }
+        }
+      }
+      class BackButtonServiceFake {
+        /** @return BackButtonMarker */
+        push() {
+          return new BackButtonMarkerFake();
+        }
+      }
+      return new BackButtonServiceFake();
+  }
+  return null;
 }
 
 /**

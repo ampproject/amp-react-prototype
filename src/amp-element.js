@@ -75,6 +75,14 @@ export default function AmpElementFactory(BaseElement) {
       }
     }
 
+    activate() {
+      this.executeAction({action: 'activate'});
+    }
+
+    executeAction(invocation) {
+      this.implementation_.executeAction(invocation);
+    }
+
     handleIntersectionObserver_(records) {
       const last = records.length
         ? records[records.length - 1]

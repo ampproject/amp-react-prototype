@@ -174,9 +174,12 @@
 
     <script src="https://unpkg.com/react/umd/react.development.js"></script>
     <script src="http://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/prop-types/prop-types.js"></script>
+    <script src="https://unpkg.com/react-router/umd/react-router.js"></script>
     <script type="module" src="./src/amp-react-img.js"></script>
     <script type="module" src="./src/amp-react-carousel.js"></script>
     <script type="module" src="./src/amp-react-carousel-hooks.js"></script>
+    <script type="module" src="./src/amp-react-lightbox.js"></script>
     <script type="module" src="./src/amp-react-size.js"></script>
     <script type="module" src="./src/amp-react-youtube.js"></script>
     <script type="module" src="./src/amp-react-youtube-hooks.js"></script>
@@ -199,6 +202,39 @@
     </script>
   </head>
   <body>
+
+    <amp-react-lightbox id="lightbox1" hidden transition-anchor="button1">
+      <div>This is a lightbox</div>
+
+      <amp-react-img
+          id="l1_img1"
+          alt="bindable"
+          src="https://via.placeholder.com/90x90.png?text=lightbox1-1"
+          width=90
+          height=90></amp-react-img>
+
+      <form
+          onchange="console.log('form changed')"
+          onreset="console.log('form reset')">
+        <input value="">
+        <textarea rows="5" cols="50"></textarea>
+        <input type="checkbox">
+        <input type="reset" value="Reset">
+      </form>
+
+      <div style="height: 500vh">scroll down...</div>
+
+      <amp-react-img
+          id="l1_img2"
+          alt="bindable"
+          src="https://via.placeholder.com/90x90.png?text=lightbox1-2"
+          width=90
+          height=90></amp-react-img>
+    </amp-react-lightbox>
+
+    <div>
+      <button id="button1" onclick="lightbox1.activate()">Show lightbox</button>
+    </div>
 
     <h1>amp-react-img</h1>
     <amp-react-img
