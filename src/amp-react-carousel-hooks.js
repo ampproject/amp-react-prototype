@@ -110,6 +110,7 @@ export function AmpCarouselHooks(props) {
         withAmpContext,
         {
           renderable: index == currentSlide,
+          playable: index == currentSlide,
         },
         React.createElement('div', outs, child)
       );

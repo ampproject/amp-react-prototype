@@ -117,7 +117,14 @@ class App extends React.Component {
             <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
           )}
           >
-          {this.state.slides.map(index => (
+          {this.state.slides.map(index => index == 1 ? (
+            <AmpYoutubeHooks
+                key="slide-yt"
+                id="c1_yt1"
+                videoid="TEcvbWCYFZg"
+                style={{width: '120px', height: '90px'}}
+                />
+            ) : (
             <div key={`slide-${index}`}>
               slide{index}
               <AmpImg

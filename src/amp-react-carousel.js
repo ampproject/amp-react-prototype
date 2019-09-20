@@ -90,6 +90,7 @@ export class AmpCarousel extends React.Component {
           withAmpContext,
           {
             renderable: index == this.state.currentSlide,
+            playable: index == this.state.currentSlide,
           },
           React.createElement('div', props, child)
         );

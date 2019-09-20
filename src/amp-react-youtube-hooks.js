@@ -20,6 +20,8 @@ import { AmpContext } from './amp-context.js';
 
 const {
   useContext,
+  useEffect,
+  useRef,
 } = React;
 
 /**
@@ -55,19 +57,31 @@ const PlayerFlags = {
  */
 export function AmpYoutubeHooks(props) {
   const context = useContext(AmpContext);
+  const iframeRef = useRef();
   // TBD: This is just a demonstration. In reality, this doesn't work
   // correctly since it unloads images unnecessary. The `playable` property,
   // however, would work better in this scheme.
-  if (!context.renderable) {
-    return null;
-  }
+
+  // TBD: disable for now. otherwise it re-renders from scratch each time.
+  // if (!context.renderable) {
+  //   return null;
+  // }
+
+  useEffect(() => {
+    if (!context.playable) {
+      // Pause.
+      sendYtCommand(iframeRef.current, 'pauseVideo');
+    }
+  }, [context.playable]);
 
   const attrs = {
+    'ref': iframeRef,
     'frameBorder': 0,
     'allowFullScreen': true,
     'allow': 'autoplay;',
     'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
     'src': getVideoIframeSrc_(props),
+    'style': props.style,
   };
   return React.createElement('iframe', attrs);
 }
@@ -150,6 +164,23 @@ function getVideoIframeSrc_(props) {
   }
 
   return addParamsToUrl(src, params);
+}
+  
+/**
+ * @param {?HTMLIframeElement} iframe
+ * @param {string} command
+ * @param {*} opt_args
+ */
+function sendYtCommand(iframe, command, opt_args) {
+  if (!iframe || !iframe.contentWindow) {
+    return;
+  }
+  const message = JSON.stringify({
+    'event': 'command',
+    'func': command,
+    'args': opt_args || '',
+  });
+  iframe.contentWindow.postMessage(message, '*');
 }
 
 /**
