@@ -38,8 +38,6 @@ class App extends React.Component {
     super(props);
     this.backButtonService = new BackButtonServiceFake();
     this.buttonRef = React.createRef();
-    this.videoRef = React.createRef(null);
-    this.videoRefWithForward = React.createRef(null);
   }
 
   render() {
@@ -102,35 +100,6 @@ class App extends React.Component {
         </div>
 
 
-        <video ref={this.videoRef}
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-          width="300" height="150">
-        </video>
-
-        <VideoPlayerWithProp
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-          width="300" height="150"
-          playState={this.state.videoRefWithPropPlayState}>
-        </VideoPlayerWithProp>
-
-        <VideoPlayerWithForward ref={this.videoRefWithForward}
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-          width="300" height="150">
-        </VideoPlayerWithForward>
-
-        <div>
-          <button onClick={() => {
-            this.videoRef.current.play();
-            this.setState({videoRefWithPropPlayState: 'play'});
-            this.videoRefWithForward.current.play();
-          }}>Play</button>
-          <button onClick={() => {
-            this.videoRef.current.pause();
-            this.setState({videoRefWithPropPlayState: 'pause'});
-            this.videoRefWithForward.current.pause();
-          }}>Pause</button>
-        </div>
-
         <h1>amp-react-img</h1>
         <AmpImg
           id="first"
@@ -190,49 +159,6 @@ class App extends React.Component {
   }
 }
 
-function VideoPlayerWithProp(props) {
-  const videoRef = React.useRef(null);
-  const {playState, ...otherProps} = props;
-  const [playStateState, setPlayState] = React.useState();
-  if (playStateState != playState) {
-    setPlayState(playState);
-  }
-  // TBD: use layout effect just in case so that we don't lose the user gesture
-  // window.
-  React.useLayoutEffect(() => {
-    // TBD: the `play` method in Video object returns a Promise - a useful API.
-    const video = videoRef.current;
-    switch (playStateState) {
-      case 'play':
-        video.play();
-        break;
-      case 'pause':
-        video.pause();
-        break;
-    }
-  }, [playStateState]);
-  return (<video ref={videoRef} {...otherProps}/>);
-}
-
-// TBD: This version uses ref-forwarding. React warns not to overuse this.
-// But at the same they say media playback is a good reason to use it:
-// https://reactjs.org/docs/refs-and-the-dom.html. Although this example
-// has a different twist on this concept by exporting an API contract instead
-// of a DOM element itself.
-const VideoPlayerWithForward = React.forwardRef((props, ref) => {
-  const videoRef = React.useRef(null);
-  React.useImperativeHandle(ref, () => ({
-    play() {
-      return videoRef.current.play();
-    },
-    pause() {
-      return videoRef.current.pause();
-    },
-  }));
-  return (<video ref={videoRef} {...props}/>);
-});
-
-ReactDOM.render(<App/>, document.getElementById('app'))
 
 // TODO: redo this service via Router.history object.
 class BackButtonServiceFake {

@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Videos in React</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+class App extends React.Component {
+  state = {};
+
+  constructor(props) {
+    super(props);
+    this.videoRef = React.createRef(null);
+    this.videoRefWithForward = React.createRef(null);
+  }
+
+  render() {
+    return (
+      <main>
+        <h3>A video element</h3>
+        <video ref={this.videoRef}
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          width="300" height="150">
+        </video>
+
+        <h3>Controlled component with playState property</h3>
+        <VideoPlayerWithProp
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          width="300" height="150"
+          playState={this.state.videoRefWithPropPlayState}>
+        </VideoPlayerWithProp>
+
+        <h3>Component with forward-ref imperative API</h3>
+        <VideoPlayerWithForward ref={this.videoRefWithForward}
+          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          width="300" height="150">
+        </VideoPlayerWithForward>
+
+        <div>
+          <button onClick={() => {
+            this.videoRef.current.play();
+            this.setState({videoRefWithPropPlayState: 'play'});
+            this.videoRefWithForward.current.play();
+          }}>Play</button>
+          <button onClick={() => {
+            this.videoRef.current.pause();
+            this.setState({videoRefWithPropPlayState: 'pause'});
+            this.videoRefWithForward.current.pause();
+          }}>Pause</button>
+        </div>
+      </main>
+    )
+  }
+}
+
+function VideoPlayerWithProp(props) {
+  const videoRef = React.useRef(null);
+  const {playState, ...otherProps} = props;
+  const [playStateState, setPlayState] = React.useState();
+  if (playStateState != playState) {
+    setPlayState(playState);
+  }
+  // TBD: use layout effect just in case so that we don't lose the user gesture
+  // window.
+  React.useLayoutEffect(() => {
+    // TBD: the `play` method in Video object returns a Promise - a useful API.
+    const video = videoRef.current;
+    switch (playStateState) {
+      case 'play':
+        video.play();
+        break;
+      case 'pause':
+        video.pause();
+        break;
+    }
+  }, [playStateState]);
+  return (<video ref={videoRef} {...otherProps}/>);
+}
+
+// TBD: This version uses ref-forwarding. React warns not to overuse this.
+// But at the same they say media playback is a good reason to use it:
+// https://reactjs.org/docs/refs-and-the-dom.html. Although this example
+// has a different twist on this concept by exporting an API contract instead
+// of a DOM element itself.
+const VideoPlayerWithForward = React.forwardRef((props, ref) => {
+  const videoRef = React.useRef(null);
+  React.useImperativeHandle(ref, () => ({
+    play() {
+      return videoRef.current.play();
+    },
+    pause() {
+      return videoRef.current.pause();
+    },
+  }));
+  return (<video ref={videoRef} {...props}/>);
+});
+
+ReactDOM.render(<App/>, document.getElementById('app'))
+</script>
+</body>
+</html>
