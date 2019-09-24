@@ -731,6 +731,7 @@ function Slot(props) {
           });
         }
       });
+
     }
 
     const oldContext = slot['i-amphtml-context'];
@@ -755,6 +756,11 @@ function Slot(props) {
         node.dispatchEvent(event);
       });
     }
+
+    return () => {
+      // TODO: force unload of all components
+      debugger;
+    };
   });
   // TBD: Just for debug for now. but maybe can also be used for hydration?
   slotProps['i-amphtml-context'] = JSON.stringify(context);

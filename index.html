@@ -183,6 +183,7 @@
     <script type="module" src="./src/amp-react-size.js"></script>
     <script type="module" src="./src/amp-react-youtube.js"></script>
     <script type="module" src="./src/amp-react-youtube-hooks.js"></script>
+    <script type="module" src="./src/amp-react-unload-outside-viewport.js"></script>
     <script>
       function addSlide() {
         [c1, c2].forEach(function(carousel) {
@@ -393,16 +394,20 @@
 
     <div style="height: 500vh">scroll down...</div>
 
-    <amp-react-img
-      id="second"
-      alt="bindable"
-      src="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true"
-      layout="responsive"
+    <amp-react-unload-outside-viewport
+      layout=responsive
       width=300
-      height=90>
-    </amp-react-img>
-
-  </body>
+      height=150
+      style="display: block">
+      <amp-react-img
+        id="second"
+        alt="bindable"
+        src="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true"
+        layout="responsive"
+        width=300
+        height=90>
+      </amp-react-img>
+    </amp-react-unload-outside-viewport>
 
   <amp-react-youtube
       id="myVideo"
@@ -418,4 +423,6 @@
       height="204"
       layout="responsive">
   </amp-react-youtube-hooks>
+
+  </body>
 </html>
