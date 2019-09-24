@@ -15,6 +15,7 @@
  */
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
+import {withAmpContext, AmpContext} from './amp-context.js';
 
 const {
   useEffect,
@@ -32,6 +33,7 @@ const {
 export function AmpUnloadOutsideViewport(props) {
   const wrapper = useRef(null);
   const [loaded, setLoad] = useState(false);
+  const context = useContext(AmpContext);
 
   useEffect(() => {
     const io = new IntersectionObserver((records) => {
@@ -51,9 +53,11 @@ export function AmpUnloadOutsideViewport(props) {
 
   const children = loaded ? props.children : null;
 
-  return React.createElement('div', {
-    ref: wrapper,
-  }, children);
+  return React.createElement(
+    withAmpContext,
+    context,
+    React.createElement('div', { ref: wrapper }, children)
+  );
 }
 
 const AmpReactUnloadOutsideViewport = ReactCompatibleBaseElement(AmpUnloadOutsideViewport, {

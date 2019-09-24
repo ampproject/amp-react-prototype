@@ -62,12 +62,9 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
       this.customProps_ = {};
 
-      /** @private {?Component} */
-      this.el_ = null;
-
       this.win = self;
 
-      this.renderScheduled_ = false;
+      this.scheduledRender_ = 0;
 
       this.context_ = {
         renderable: false,
@@ -104,6 +101,10 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         e.stopPropagation();
         this.scheduleRender_();
       });
+      this.element.addEventListener('i-amphtml-unmounted', e => {
+        e.stopPropagation();
+        this.unmount_();
+      });
     }
 
     /** @override */
@@ -132,16 +133,12 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     onMeasureChanged() {
       // TBD: If the component cares about its width, it has to do it
       // independently. Otherwise, it will break React-only mode.
-      // const el = devAssert(this.el_);
-      // el.setState({ layoutWidth: this.getLayoutWidth() });
     }
 
     /** @override */
     viewportCallback(inViewport) {
       // TBD: Ditto: if it's important for the component to know intersection
       // with the viewport - it has to track it independently.
-      // const el = devAssert(this.el_);
-      // el.setState({ inViewport });
     }
 
     mutateProps(props) {
@@ -151,12 +148,22 @@ export default function ReactCompatibleBaseElement(Component, opts) {
 
     /** @private */
     scheduleRender_() {
-      if (!this.renderScheduled_) {
-        this.renderScheduled_ = true;
-        requestAnimationFrame(() => {
-          this.renderScheduled_ = false;
+      if (this.scheduledRender_ === 0) {
+        this.scheduledRender_ = requestAnimationFrame(() => {
+          this.scheduledRender_ = 0;
           this.rerender_();
         });
+      }
+    }
+
+    /** @private */
+    unmount_() {
+      if (this.scheduledRender_ !== 0) {
+        cancelAnimationFrame(this.scheduledRender_);
+        this.scheduledRender_ = 0;
+      }
+      if (this.container_) {
+        ReactDOM.render(React.createElement(React.Fragment, null), this.container_);
       }
     }
 
@@ -188,11 +195,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       const context = getContextFromDom(this.element, this.context_);
       const v = React.createElement(withAmpContext, context, cv);
 
-      // TBD: function components return `null` here and generally do not
-      // allow setting state from the outside, afaic. This is somewhat expected
-      // but causes problems for us since, in theory, we don't know whether a
-      // `Component` is a class component or a function component.
-      this.el_ = ReactDOM.render(v, this.container_);
+      ReactDOM.render(v, this.container_);
     }
 
     /** Mocks of the BaseElement base class methods/props */
@@ -740,11 +743,7 @@ function Slot(props) {
       // TODO: Switch to fast child-node discover. See Revamp for the algo.
       const affectedNodes = [];
       slot.assignedNodes().forEach(node => {
-        if (node.matches('.i-amphtml-element')) {
-          affectedNodes.push(node);
-        } else {
-          affectedNodes.push(...node.querySelectorAll('.i-amphtml-element'));
-        }
+        affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
         const event = new Event('i-amphtml-context-changed', {
@@ -756,12 +755,28 @@ function Slot(props) {
         node.dispatchEvent(event);
       });
     }
-
-    return () => {
-      // TODO: force unload of all components
-      debugger;
-    };
   });
+
+  // Register an unmount listener. This can't be joined with the previous
+  // useEffect, because it must only be run once while the previous needs to
+  // run every render.
+  useEffect(() => {
+    return () => {
+      const affectedNodes = [];
+      ref.current.assignedNodes().forEach(node => {
+        affectedNodes.push(...getAmpElements(node));
+      });
+      affectedNodes.forEach(node => {
+        const event = new Event('i-amphtml-unmounted', {
+          bubbles: false,
+          cancelable: true,
+          composed: true,
+        });
+        node.dispatchEvent(event);
+      });
+    };
+  }, []);
+
   // TBD: Just for debug for now. but maybe can also be used for hydration?
   slotProps['i-amphtml-context'] = JSON.stringify(context);
   return React.createElement('slot', slotProps);
@@ -804,4 +819,12 @@ function objectsEqualShallow(o1, o2) {
     }
   }
   return true;
+}
+
+function getAmpElements(root) {
+  if (root.matches('.i-amphtml-element')) {
+    return [root];
+  } else {
+    return root.querySelectorAll('.i-amphtml-element');
+  }
 }
