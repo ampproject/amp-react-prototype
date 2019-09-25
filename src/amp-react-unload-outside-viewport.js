@@ -16,10 +16,9 @@
 
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {withAmpContext, AmpContext} from './amp-context.js';
+import {useMountEffect} from './amp-react-utils.js';
 
 const {
-  useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   useContext,
@@ -35,12 +34,13 @@ export function AmpUnloadOutsideViewport(props) {
   const [loaded, setLoad] = useState(false);
   const context = useContext(AmpContext);
 
-  useEffect(() => {
+  useMountEffect(() => {
     const io = new IntersectionObserver((records) => {
-      const last = records.length
-        ? records[records.length - 1]
-        : { isIntersecting: false };
-      const isVisible = last.isIntersecting;
+      const { length } = records;
+      if (length === 0) {
+        return;
+      }
+      const isVisible = records[length - 1].isIntersecting;
 
       setLoad(isVisible);
     });
@@ -49,7 +49,7 @@ export function AmpUnloadOutsideViewport(props) {
     return function unmount() {
       io.disconnect();
     };
-  }, []);
+  });
 
   const children = loaded ? props.children : null;
 
@@ -61,8 +61,6 @@ export function AmpUnloadOutsideViewport(props) {
 }
 
 const AmpReactUnloadOutsideViewport = ReactCompatibleBaseElement(AmpUnloadOutsideViewport, {
-  children: {
-    'children': '*',
-  },
+  passthrough: true,
 });
 customElements.define('amp-react-unload-outside-viewport', AmpReactUnloadOutsideViewport);

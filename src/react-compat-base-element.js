@@ -20,6 +20,7 @@ import {
   AmpContext,
   withAmpContext,
 } from './amp-context.js';
+import {useMountEffect} from './amp-react-utils.js';
 
 const {
   useContext,
@@ -163,7 +164,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         this.scheduledRender_ = 0;
       }
       if (this.container_) {
-        ReactDOM.render(React.createElement(React.Fragment, null), this.container_);
+        ReactDOM.render(React.Fragment, this.container_);
       }
     }
 
@@ -532,7 +533,7 @@ function collectProps(element, opts) {
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
   if (opts.passthrough) {
-    props.children = [React.createElement('slot')];
+    props.children = [React.createElement(Slot)];
   } else if (opts.children) {
     const children = [];
     for (let i = 0; i < element.children.length; i++) {
@@ -701,7 +702,7 @@ function Slot(props) {
       //    `hidden`. Similarly do other attributes.
       // 2. Re-propagate click events to slots since React stops propagation.
       //    See https://github.com/facebook/react/issues/9242.
-      slot.assignedNodes().forEach(node => {
+      slot.assignedElements().forEach(node => {
         // Basic attributes:
         const { attributes } = slot;
         for (let i = 0, l = attributes.length; i < l; i++) {
@@ -742,7 +743,7 @@ function Slot(props) {
       slot['i-amphtml-context'] = context;
       // TODO: Switch to fast child-node discover. See Revamp for the algo.
       const affectedNodes = [];
-      slot.assignedNodes().forEach(node => {
+      slot.assignedElements().forEach(node => {
         affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
@@ -760,10 +761,10 @@ function Slot(props) {
   // Register an unmount listener. This can't be joined with the previous
   // useEffect, because it must only be run once while the previous needs to
   // run every render.
-  useEffect(() => {
+  useMountEffect(() => {
     return () => {
       const affectedNodes = [];
-      ref.current.assignedNodes().forEach(node => {
+      ref.current.assignedElements().forEach(node => {
         affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
@@ -775,7 +776,7 @@ function Slot(props) {
         node.dispatchEvent(event);
       });
     };
-  }, []);
+  });
 
   // TBD: Just for debug for now. but maybe can also be used for hydration?
   slotProps['i-amphtml-context'] = JSON.stringify(context);
@@ -822,9 +823,9 @@ function objectsEqualShallow(o1, o2) {
 }
 
 function getAmpElements(root) {
+  const elements = [...root.querySelectorAll('.i-amphtml-element')];
   if (root.matches('.i-amphtml-element')) {
-    return [root];
-  } else {
-    return root.querySelectorAll('.i-amphtml-element');
+    elements.unshift(root);
   }
+  return elements;
 }

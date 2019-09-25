@@ -53,7 +53,7 @@ export function useStateFromProp(prop) {
  * @param {function(number, number)} callback
  */
 export function useResizeEffect(elementRef, callback) {
-  useEffect(() => {
+  useMountEffect(() => {
     const element = elementRef.current;
     if (window.ResizeObserver) {
       // TBD: Is there a large cost for creating new resize observers for
@@ -93,38 +93,9 @@ export function useResizeEffect(elementRef, callback) {
         win.removeEventListener('resize', resizeHandler);
       };
     }
-  }, [/* mount-only effect*/]);
+  });
 }
 
-function CollectedContexts(props) {
-  const [cb, values] = props.children;
-  return cb(values);
-}
-
-/**
- * @param {function(!Array): ReactElement} callback
- * @param {...Context} contexts
- * @return ReactElement
- */
-export function useContexts(contexts, callback) {
-  const values = new Array(contexts.length);
-  let el = React.createElement(CollectedContexts, null, callback, values);
-
-  for (let i = contexts.length - 1; i >= 0; i--) {
-    const current = el;
-    el = React.createElement(contexts[i].Consumer, null, (value) => {
-      values[i] = value;
-      return current;
-    });
-  }
-
-  return el;
-}
-
-export function useHasEverLoaded(loaded) {
-  const state = useRef(!!loaded);
-  if (loaded) {
-    state.current = true;
-  }
-  return state.current;
+export function useMountEffect(callback) {
+  useEffect(callback, [/* mount-only effect*/]);
 }

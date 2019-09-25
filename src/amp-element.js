@@ -166,30 +166,9 @@ function applyStaticLayout(element) {
   userAssert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
 
   // Effective layout attributes. These are effectively constants.
-  let width;
-  let height;
+  let width = inputWidth;
+  let height = inputHeight;
   let layout;
-
-  // Calculate effective width and height.
-  if (
-    (!inputLayout ||
-      inputLayout == Layout.FIXED ||
-      inputLayout == Layout.FIXED_HEIGHT) &&
-    (!inputWidth || !inputHeight) &&
-    hasNaturalDimensions(element.tagName)
-  ) {
-    // Default width and height: handle elements that do not specify a
-    // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element);
-    width =
-      inputWidth || inputLayout == Layout.FIXED_HEIGHT
-        ? inputWidth
-        : dimensions.width;
-    height = inputHeight || dimensions.height;
-  } else {
-    width = inputWidth;
-    height = inputHeight;
-  }
 
   // Calculate effective layout.
   if (inputLayout) {
