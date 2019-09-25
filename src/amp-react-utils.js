@@ -53,7 +53,7 @@ export function useStateFromProp(prop) {
  * @param {function(number, number)} callback
  */
 export function useResizeEffect(elementRef, callback) {
-  useEffect(() => {
+  useMountEffect(() => {
     const element = elementRef.current;
     if (window.ResizeObserver) {
       // TBD: Is there a large cost for creating new resize observers for
@@ -93,5 +93,9 @@ export function useResizeEffect(elementRef, callback) {
         win.removeEventListener('resize', resizeHandler);
       };
     }
-  }, [/* mount-only effect*/]);
+  });
+}
+
+export function useMountEffect(callback) {
+  useEffect(callback, [/* mount-only effect*/]);
 }
