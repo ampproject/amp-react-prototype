@@ -39,6 +39,7 @@ export function withAmpContext(props) {
   const parent = useContext(AmpContext);
   const current = {
     renderable: parent.renderable && props.renderable,
+    playable: parent.playable && props.playable,
   };
   return React.createElement(
     AmpContext.Provider,

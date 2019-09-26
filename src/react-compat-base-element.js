@@ -111,6 +111,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     /** @override */
     layoutCallback() {
       this.context_.renderable = true;
+      this.context_.playable = true;
       this.scheduleRender_();
     }
 

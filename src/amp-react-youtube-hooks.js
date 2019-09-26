@@ -20,6 +20,8 @@ import { AmpContext } from './amp-context.js';
 
 const {
   useContext,
+  useEffect,
+  useRef,
 } = React;
 
 /**
@@ -55,18 +57,32 @@ const PlayerFlags = {
  */
 export function AmpYoutubeHooks(props) {
   const context = useContext(AmpContext);
+  const iframeRef = useRef();
   // TBD: This is just a demonstration. In reality, this doesn't work
   // correctly since it unloads images unnecessary. The `playable` property,
   // however, would work better in this scheme.
+
+  useEffect(() => {
+    if (!iframeRef.current) {
+      return;
+    }
+    if (!context.playable) {
+      // Pause.
+      sendYtCommand(iframeRef.current, 'pauseVideo');
+    }
+  }, [context.playable]);
+
+  // TODO: use `useHasBeenLoaded` once ready.
   if (!context.renderable) {
     return null;
   }
 
   const attrs = {
+    ...props,
+    'ref': iframeRef,
     'frameBorder': 0,
     'allowFullScreen': true,
-    'allow': 'autoplay;',
-    'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
+    'allow': 'autoplay;',    
     'src': getVideoIframeSrc_(props),
   };
   return React.createElement('iframe', attrs);
@@ -151,6 +167,23 @@ function getVideoIframeSrc_(props) {
 
   return addParamsToUrl(src, params);
 }
+  
+/**
+ * @param {?HTMLIframeElement} iframe
+ * @param {string} command
+ * @param {*} opt_args
+ */
+function sendYtCommand(iframe, command, opt_args) {
+  if (!iframe || !iframe.contentWindow) {
+    return;
+  }
+  const message = JSON.stringify({
+    'event': 'command',
+    'func': command,
+    'args': opt_args || '',
+  });
+  iframe.contentWindow.postMessage(message, '*');
+}
 
 /**
  * Appends query string fields and values to a url. The `params` objects'
@@ -219,6 +252,7 @@ function serializeQueryString(params) {
 }
 
 const AmpReactYoutubeHooks = ReactCompatibleBaseElement(AmpYoutubeHooks, {
+  className: 'i-amphtml-fill-content i-amphtml-replaced-content',
   attrs: {
     'data-videoid': {
       prop: 'videoid',
