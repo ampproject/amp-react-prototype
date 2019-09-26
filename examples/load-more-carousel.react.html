@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Load More in Carousel</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+  <script type="module">
+    import {AmpImg} from '../src/amp-react-img.js';
+    import {AmpCarouselHooks} from '../src/amp-react-carousel-hooks.js';
+    import {SamplePullChunkDataSource} from './datasource.js';
+    window.AmpImg = AmpImg;
+    window.AmpCarousel = AmpCarouselHooks;
+    window.SamplePullChunkDataSource = SamplePullChunkDataSource;
+  </script>
+
+  <style>
+    .loading.animated {
+      animation: 1s animation 100;
+    }
+    @keyframes animation {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.1;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+const {
+  useEffect,
+  useRef,
+  useState,
+} = React;
+
+
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      datasource: new SamplePullChunkDataSource(),
+    };
+  }
+
+  render() {
+    return (
+      <main>
+        <LoadMoreCarousel datasource={this.state.datasource} />
+        <div>
+          <button onClick={() => {
+            this.setState({datasource: new SamplePullChunkDataSource(100)});
+          }}>Change data source</button>
+        </div>
+      </main>
+    )
+  }
+}
+
+
+function LoadMoreCarousel(props) {
+  // TBD: datasource changes are important for us, for things like
+  // mutation of `src` in `amp-list`.
+  const {datasource} = props;
+
+  const [slides, setSlides] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [chunk, setChunk] = useState(0);
+
+  const loadingRef = useRef();
+  const loadingPromise = useRef();
+
+  useEffect(() => {
+    // If data source changed, reset chunk and data.
+    setChunk(0);
+    setSlides([]);
+  }, [datasource]);
+
+  useEffect(() => {
+    if (loadingPromise.current) {
+      return;
+    }
+    const loadingItem = loadingRef.current;
+    // TBD: is it ok that the renderer can override this?
+    loadingItem && loadingItem.classList.add('animated');
+    loadingPromise.current = datasource.next().then(({value, done}) => {
+      // Update state.
+      // TBD: this is kind of hard to do right to avoid overwriting or
+      // concatenating when not necessary.
+      setSlides(chunk ? slides.concat(value || []) : (value || []));
+      setHasMore(!done);
+      // Reset for next load.
+      loadingItem && loadingItem.classList.remove('animated');
+      loadingPromise.current = null;
+    });
+  }, [datasource, chunk]);
+
+  const slideChanged = ({currentSlide}) => {
+    const slideCount = slides.length;
+    console.log('slide changed: ', currentSlide, 'vs', slideCount);
+    if (slideCount - currentSlide <= 2) {
+      // Getting close to the end: load more slides.
+      setChunk(chunk + 1);
+    }
+  };
+
+  return (
+    <AmpCarousel
+      style={{width: '300px', height: '150px'}}
+      onSlideChange={slideChanged}>
+      {slides.map(index => (
+        <div key={`slide-${index}`}>
+          <AmpImg
+            id={`c1_slide${index}_img`}
+            alt="bindable"
+            src={`https://via.placeholder.com/90x90.png?text=slide${index}`}
+            style={{width: '90px', height: '90px'}}
+            >
+          </AmpImg>
+        </div>
+      )).concat(
+        hasMore
+        && (
+              <div key="loading" className="loading" ref={loadingRef}>
+                loading...
+              </div>
+            )
+        || []
+      )}
+    </AmpCarousel>
+  );
+}
+
+
+ReactDOM.render(<App/>, document.getElementById('app'))
+</script>
+</body>
+</html>

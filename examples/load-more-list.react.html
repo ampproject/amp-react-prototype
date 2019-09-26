@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Load More in Carousel</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+  <script type="module">
+    import {AmpImg} from '../src/amp-react-img.js';
+    import {SamplePullChunkDataSource} from './datasource.js';
+    window.AmpImg = AmpImg;
+    window.SamplePullChunkDataSource = SamplePullChunkDataSource;
+  </script>
+  <style>
+    .list {
+    }
+    .item {
+      height: 50px;
+      border: 1px dotted lightgray;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .item.animated {
+      animation: 1s animation 100;
+    }
+    @keyframes animation {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.1;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+const {
+  useEffect,
+  useRef,
+  useState,
+} = React;
+
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      datasource: new SamplePullChunkDataSource(),
+    };
+  }
+
+  render() {
+    console.log('render with ', this.state.datasource);
+    return (
+      <main>
+        <LoadMoreList datasource={this.state.datasource} />
+        <div>
+          <button onClick={() => {
+            this.setState({datasource: new SamplePullChunkDataSource(100)});
+          }}>Change data source</button>
+        </div>
+      </main>
+    )
+  }
+}
+
+
+function LoadMoreList(props) {
+  // TBD: datasource changes are important for us, for things like
+  // mutation of `src` in `amp-list`.
+  const {datasource} = props;
+
+  const [items, setItems] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [chunk, setChunk] = useState(0);
+
+  const bottomMarkerRef = useRef();
+  const loadMoreRef = useRef();
+  const loadingPromise = useRef();
+
+  function loadMore() {
+    setChunk(chunk => chunk + 1);
+  }
+
+  useEffect(() => {
+    const bottomMarker = bottomMarkerRef.current;
+    const inob = new IntersectionObserver(records => {
+      const last = records[records.length - 1];
+      if (last.isIntersecting) {
+        loadMore();
+      }
+    });
+    inob.observe(bottomMarker);
+    return function unmount() {
+      inob.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    // If data source changed, reset chunk and data.
+    setChunk(0);
+    setItems([]);
+  }, [datasource]);
+
+  useEffect(() => {
+    if (loadingPromise.current) {
+      return;
+    }
+    const loadMoreItem = loadMoreRef.current;
+    // TBD: is it ok that the renderer can override this?
+    loadMoreItem && loadMoreItem.classList.add('animated');
+    loadingPromise.current = datasource.next().then(({value, done}) => {
+      // Update state.
+      // TBD: this is kind of hard to do right to avoid overwriting or
+      // concatenating when not necessary.
+      setItems(items => items.concat(value || []));
+      setHasMore(!done);
+      // Reset for next load.
+      loadMoreItem && loadMoreItem.classList.remove('animated');
+      loadingPromise.current = null;
+    });
+  }, [datasource, chunk]);
+
+  return (
+    <div role="list" className="list">
+      {items.map(item => (
+        <div key={item} className="item">
+          {item}
+        </div>
+      )).concat(
+        hasMore
+        && (
+              <div key="loadmore" className="item" ref={loadMoreRef}>
+                <button onClick={loadMore}>
+                  load more
+                </button>
+              </div>
+            )
+        || []
+      ).concat(
+        (<div ref={bottomMarkerRef} key="bottommarker"></div>)
+      )}
+    </div>
+  );
+}
+
+
+ReactDOM.render(<App/>, document.getElementById('app'))
+</script>
+</body>
+</html>
