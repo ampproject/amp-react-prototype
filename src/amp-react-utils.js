@@ -99,3 +99,22 @@ export function useResizeEffect(elementRef, callback) {
 export function useMountEffect(callback) {
   useEffect(callback, [/* mount-only effect*/]);
 }
+
+/**
+ * Determines if the component has ever been given permission to load.
+ *
+ * This is useful components that are not expensive after initial render,
+ * especially if it would be more expensive to unload then reload them later.
+ * Think, <amp-img>, which is just fine to keep rendered after its loaded.
+ *
+ * @param {!AmpContext}
+ * @return {boolean}
+ */
+export function useHasEverLoaded(ampContext) {
+  const loaded = !!ampContext.renderable;
+  const state = useRef(loaded);
+  if (loaded) {
+    state.current = true;
+  }
+  return state.current;
+}
