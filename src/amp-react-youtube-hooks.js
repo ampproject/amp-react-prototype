@@ -62,26 +62,28 @@ export function AmpYoutubeHooks(props) {
   // correctly since it unloads images unnecessary. The `playable` property,
   // however, would work better in this scheme.
 
-  // TBD: disable for now. otherwise it re-renders from scratch each time.
-  // if (!context.renderable) {
-  //   return null;
-  // }
-
   useEffect(() => {
+    if (!iframeRef.current) {
+      return;
+    }
     if (!context.playable) {
       // Pause.
       sendYtCommand(iframeRef.current, 'pauseVideo');
     }
   }, [context.playable]);
 
+  // TODO: use `useHasBeenLoaded` once ready.
+  if (!context.renderable) {
+    return null;
+  }
+
   const attrs = {
+    ...props,
     'ref': iframeRef,
     'frameBorder': 0,
     'allowFullScreen': true,
-    'allow': 'autoplay;',
-    'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
+    'allow': 'autoplay;',    
     'src': getVideoIframeSrc_(props),
-    'style': props.style,
   };
   return React.createElement('iframe', attrs);
 }
@@ -250,6 +252,7 @@ function serializeQueryString(params) {
 }
 
 const AmpReactYoutubeHooks = ReactCompatibleBaseElement(AmpYoutubeHooks, {
+  className: 'i-amphtml-fill-content i-amphtml-replaced-content',
   attrs: {
     'data-videoid': {
       prop: 'videoid',
