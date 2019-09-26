@@ -186,7 +186,10 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         }
       }
 
-      const props = {...collectProps(this.element, opts), ...this.customProps_};
+      const props = {
+        ...collectProps(this.element, opts),
+        ...this.customProps_,
+      };
 
       // While this "creates" a new element, React's diffing will not create
       // a second instance of Component. Instead, the existing one already
@@ -500,15 +503,23 @@ export default function ReactCompatibleBaseElement(Component, opts) {
  * @return {!Object}
  */
 function collectProps(element, opts) {
-  const defs = opts.attrs || {};
   const props = {};
 
+  // Class.
+  if (opts.className) {
+    props['className'] = opts.className;
+  }
+
   // Attributes.
-  const { attributes } = element;
-  for (let i = 0, l = attributes.length; i < l; i++) {
-    const { name, value } = attributes[i];
+  const defs = opts.attrs || {};
+  for (const name in defs) {
     const def = defs[name];
-    if (def) {
+    const value = element.getAttribute(name);
+    if (value == null) {
+      if (def.default != null) {
+        props[def.prop] = def.default;
+      }
+    } else {
       const v =
         def.type == 'number' ?
         Number(value) :
@@ -518,12 +529,6 @@ function collectProps(element, opts) {
         {current: element.getRootNode().getElementById(value)} :
         value;
       props[def.prop] = v;
-    } else if (name == 'class') {
-      props.className = value;
-    } else if (name == 'style') {
-      props.style = collectStyle(element);
-    } else {
-      props[name] = value;
     }
   }
 
