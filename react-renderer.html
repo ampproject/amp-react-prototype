@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Videos in React</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+const {
+  Fragment,
+  useEffect,
+  useState,
+} = React;
+
+class App extends React.Component {
+  state = {};
+
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <main>
+        <h3>renderItem</h3>
+        <ul>
+          <AmpList src="./react-renderer-data.json"
+            renderItem={(item, index) => (
+              <li key={`item${index}`}>{item.name}</li>
+            )}>
+          </AmpList>
+        </ul>
+
+        <h3>render</h3>
+        <AmpList src="./react-renderer-data.json"
+          render={data => (
+            <Fragment>
+              <div>Count: {data.length}</div>
+              <ul>
+                {data.map((item, index) => (
+                  <li key={`item${index}`}>{item.name}</li>
+                ))}
+              </ul>
+              <div>
+                <button onClick={() => console.log('QQQQQ')}>More</button>
+              </div>
+            </Fragment>
+          )}>
+        </AmpList>
+
+
+        <AmpList
+          getData={page =>
+              fetch(`./data-${page}.json`)
+                  .then(r => r.json())
+                  .then(d => ({hasMore: d.hasMore, items: d.items}))} 
+          renderPage={data => (
+              <Fragment>
+                {data.items.map(item => (
+                  <div>{item.name}</div>
+                ))}
+              </Fragment>
+              )}
+          header={(
+            <Fragment>Some items will be here</Fragment>
+          )}
+          autoLoad={true}  // vs InViewport component
+          footer={x => {
+            <InViewport enter={x.loadMore}>
+              <div>
+                x.isError
+                ? (Failed!)
+                : x.isLoading
+                ? (loading...)
+                : x.hasMore
+                ? (<button onClick={x.loadMore}>Load more</button>)
+                : (no more!)
+              </div>
+            </InViewport>
+          }}
+          >
+          
+        </AmpList>
+
+      </main>
+    )
+  }
+}
+
+// QQQQQ:
+// - Header/footer: e.g. #of total items.
+// - Next/prev
+function AmpList(props) {
+  const [data, setData] = useState();
+  useEffect(() => {
+    if (!props.src) {
+      return;
+    }
+    fetch(props.src)
+      .then(r => r.json())
+      .then(setData);
+  }, [props.src]);
+  if (!data) {
+    return null;
+  }
+  return (
+    <Fragment>
+      {
+        props.render ? props.render(data) :
+        props.renderItem ? data.map(props.renderItem) : null
+      }
+    </Fragment>
+  );
+  // props.renderItem && data && 
+}
+
+ReactDOM.render(<App/>, document.getElementById('app'))
+</script>
+</body>
+</html>
