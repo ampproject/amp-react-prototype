@@ -20,56 +20,26 @@ import {
 } from './amp-context.js';
 
 /**
- * @param {!Object<string, *>} props
- * @param {!Array<string>} keys
- * @return {!Object<string, *>}
- */
-function pick(props, keys) {
-  const out = {};
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const value = props[key];
-    if (value !== undefined) {
-      out[key] = value;
-    }
-  }
-
-  return out;
-}
-
-/**
  * @return {boolean}
  */
 function testSrcsetSupport() {
-  const support = 'srcset' in new Image();
+  const support = 'srcset' in Image.prototype;
   testSrcsetSupport = () => support;
   return support;
 }
 
 /**
- * @param {string|undefined} src
- * @param {string|undefined} srcset
+ * @param {!Object} props
  * @return {string|undefined}
  */
-function guaranteeSrcForSrcsetUnsupportedBrowsers(src, srcset) {
+function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
+  const {src, srcSet} = props;
   if (src !== undefined || testSrcsetSupport()) {
     return src;
   }
-  const match = /\S+/.exec(srcset);
+  const match = /\S+/.exec(srcSet);
   return match ? match[0] : undefined;
 }
-
-const ATTRIBUTES_TO_PROPAGATE = [
-  'alt',
-  'title',
-  'referrerpolicy',
-  'aria-label',
-  'aria-describedby',
-  'aria-labelledby',
-  'srcset',
-  'src',
-  'sizes',
-];
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
@@ -104,26 +74,22 @@ export class AmpImg extends React.Component {
   render() {
     const context = this.context;
 
-    const props = pick(this.props, ATTRIBUTES_TO_PROPAGATE);
+    const props = Object.assign({}, this.props);
 
     const { id } = this.props;
     if (id) {
       props['amp-img-id'] = id;
     }
-    props['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(
-      props['src'],
-      props['srcset']
-    );
+    props['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(props);
     props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
     props['decoding'] = 'async';
-    props['className'] = 'i-amphtml-fill-content i-amphtml-replaced-content';
 
     // TBD: This is just a demonstration. In reality, this doesn't work
     // correctly since it unloads images unnecessary. The `playable` property,
     // however, would work better in this scheme.
     if (!context.renderable) {
       delete props['src'];
-      delete props['srcset'];
+      delete props['srcSet'];
     }
 
     return React.createElement('img', props);
@@ -138,12 +104,12 @@ export class AmpImg extends React.Component {
     if (sizes) {
       return sizes;
     }
-    const { 'i-amphtml-layout': layout, srcset } = this.props;
+    const { 'i-amphtml-layout': layout, srcSet } = this.props;
     if (layout === 'intrinsic') {
       return;
     }
 
-    if (!srcset || /[0-9]+x(?:,|$)/.test(srcset)) {
+    if (!srcSet || /[0-9]+x(?:,|$)/.test(srcSet)) {
       return;
     }
 
@@ -169,9 +135,11 @@ export class AmpImg extends React.Component {
 
 AmpImg.contextType = AmpContext;
 
-function addToClass(classes, add) {
-  return (classes || '') + ' ' + add;
-}
-
-const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {});
+const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
+  className: 'i-amphtml-fill-content i-amphtml-replaced-content',
+  attrs: {
+    'src': {prop: 'src'},
+    'srcset': {prop: 'srcSet'},
+  },
+});
 customElements.define('amp-react-img', AmpReactImg);
