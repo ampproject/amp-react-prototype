@@ -31,7 +31,6 @@
 class App extends React.Component {
   state = {
     slides: [0, 1, 2, 3, 4, 5],
-    hasMoreSlides: true,
     lightbox1Open: false,
   };
 
@@ -39,59 +38,11 @@ class App extends React.Component {
     super(props);
     this.backButtonService = new BackButtonServiceFake();
     this.buttonRef = React.createRef();
-    this.loadingPromise_ = null;
-  }
-
-  loadMoreSlides() {
-    if (this.loadingPromise_) {
-      return;
-    }
-    this.loadingPromise_ = new Promise(resolve => {
-      // TBD: 
-
-      // Pretend like it's taking some time.
-      setTimeout(() => {
-        const slideCount = this.state.slides.length;
-        const toAdd = [];
-        if (slideCount < 20) {
-          for (let i = 1; i <= 6; i++) {
-            toAdd.push(slideCount + i);
-          }
-          this.setState({slides: this.state.slides.concat(toAdd)});
-        }
-        this.setState({hasMoreSlides: slideCount + toAdd.length < 20});
-        resolve();
-      }, 2000);
-    }).then(() => {
-      // Reset for next load.
-      this.loadingPromise_ = null;
-    });
-
-
-    /*
-      LoadMore(Stream) {        
-        reader = stream.getReader();
-
-        reader.read().then({value, done} => {
-          
-        });
-      }
-    */
   }
 
   render() {
     const lightbox1BlockedMessage =
       'This lightbox has unsaved changes. Are you sure you want to close it?';
-
-    const slideChanged = ({currentSlide}) => {
-      const slideCount = this.state.slides.length;
-      console.log('slide changed: ', currentSlide, 'vs', slideCount);
-      if (slideCount - currentSlide <= 2) {
-        // Getting close the the end.
-        this.loadMoreSlides();
-      }
-    };
-
     return (
       <main>
         <ReactRouterDOM.BrowserRouter>
@@ -184,9 +135,7 @@ class App extends React.Component {
                 >
               </AmpImg>
             </div>
-          )).concat(
-            this.state.hasMoreSlides && (<div>loading...</div>) || []
-          )}
+          ))}
         </AmpCarousel>
 
         <div style={{margin: '8px 0'}}>
