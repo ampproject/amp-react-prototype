@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { AmpContext } from './amp-context.js';
 const {
   useEffect,
   useRef,
   useState,
+  useContext,
 } = React;
 
 
@@ -107,10 +109,9 @@ export function useMountEffect(callback) {
  * especially if it would be more expensive to unload then reload them later.
  * Think, <amp-img>, which is just fine to keep rendered after its loaded.
  *
- * @param {!Context}
  * @return {boolean}
  */
-export function useHasEverLoaded(AmpContext) {
+export function useHasEverLoaded() {
   const context = useContext(AmpContext);
   const state = useRef(false);
   if (context.renderable) {

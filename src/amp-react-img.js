@@ -47,7 +47,7 @@ function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
 export function AmpImg(props) {
-  const renderable = useHasEverLoaded(AmpContext);
+  const renderable = useHasEverLoaded();
   const attrs = {...props};
 
   attrs['decoding'] = 'async';
