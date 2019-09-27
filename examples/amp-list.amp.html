@@ -1,0 +1,61 @@
+
+
+<!--
+  This doesn't work because we can't slot nested children.
+-->
+<amp-carousel>
+  <amp-list scr="./carousel-data.json">
+    <template>...</template>
+  </amp-render>
+</amp-carousel>
+
+
+<!--
+  Kind of ugly and illogical.
+-->
+<amp-list scr="./carousel-data.json">
+  <amp-carousel>
+    <amp-list-render-here></amp-list-render-here>
+  </amp-carousel>
+</amp-list>
+
+
+<!--
+  <amp-render> is a slide (could also be <amp-list>).
+  - It receives signals from carousel, e.g. "active now", "may be active soon", etc.
+  - It renders and prepends actual slides ahead of itself ([insert=before]).
+  - When out of content - it will self-destruct.
+-->
+<amp-carousel>
+  <div>Slide 1</div>
+  <amp-render show-loader insert=before foreach scr="./carousel-data.json">
+    <template>...</template>
+  </amp-render>
+</amp-carousel>
+
+
+<!--
+  Works by inserting before.
+-->
+<ul>
+  <li>one</li>
+  <amp-render triggers="in-viewport" insert=before src="">
+    <template>
+      <li>...</li>
+    </template>
+    <button>Load more</button>
+  </amp-render>
+</ul>
+
+
+<!--
+  Works by preprending.
+-->
+<x-chat>
+  <amp-render triggers="in-viewport" insert=after reverse src="">
+    <template>
+      <div>...</div>
+    </template>
+    <button>Load more</button>
+  </amp-render>
+</x-chat>
