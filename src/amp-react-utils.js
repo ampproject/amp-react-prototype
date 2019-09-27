@@ -24,17 +24,6 @@ const {
 } = preactHooks;
 
 
-export function cleanProps(props) {
-  const clean = {};
-  for (const k in props) {
-    if (k[0] != '_') {
-      clean[k] = props[k];
-    }
-  }
-  return clean;
-}
-
-
 /**
  * Experimental hook to sync a state based on a property. The state is:
  * - Initialized from the property;

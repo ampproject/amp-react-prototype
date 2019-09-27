@@ -18,7 +18,7 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   AmpContext,
 } from './amp-context.js';
-import { useHasEverLoaded } from './amp-react-utils.js';
+import { exporter, useHasEverLoaded } from './amp-react-utils.js';
 
 const {
   useLayoutEffect,
@@ -70,7 +70,7 @@ export function AmpImg(props) {
     const loadPromise = new Promise(resolve => {
       img.onload = resolve;
     });
-    // TBD: export load promise.
+    exporter(props, {loadPromise});
   }, [attrs.src, attrs.srcSet]);
 
   return preact.createElement('img', attrs);
