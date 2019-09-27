@@ -43,6 +43,13 @@ export function AmpCarouselHooks(props) {
     scroller.scrollLeft = scroller.offsetWidth * currentSlide;
   }, [currentSlide]);
 
+  // Event. Don't need to be render-blocking.
+  useEffect(() => {
+    if (props.onSlideChange) {
+      props.onSlideChange({currentSlide});
+    }
+  }, [currentSlide]);
+
   function scrollHandler() {
     // TBD: Is this a good idea to manage currentSlide via state? Amount of
     // re-rendering is very small and mostly affects `scrollLeft`, which is
@@ -89,10 +96,7 @@ export function AmpCarouselHooks(props) {
     // All slides are rendered inside the scroller. It's absolutely
     // unimportant whether they are slots or actual children.
     const slideElements = slides.map((child, index) => {
-      // TBD: assign keys.
-      const outs = {
-        key: `slide-${index}`,
-      };
+      const outs = {};
       outs['style'] = {
         boxSizing: 'border-box',
         flex: '0 0 100%',
@@ -109,6 +113,7 @@ export function AmpCarouselHooks(props) {
       return React.createElement(
         withAmpContext,
         {
+          key: `slide-${index}`,
           renderable: index == currentSlide,
           playable: index == currentSlide,
         },
