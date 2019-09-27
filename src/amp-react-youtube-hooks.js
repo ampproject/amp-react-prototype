@@ -70,7 +70,7 @@ export function AmpYoutubeHooks(props) {
     }
   }, [context.playable]);
 
-  const renderable = useHasEverLoaded(context);
+  const renderable = useHasEverLoaded(AmpContext);
   if (!renderable) {
     return null;
   }

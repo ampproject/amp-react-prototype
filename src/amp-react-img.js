@@ -19,9 +19,6 @@ import {
   AmpContext,
 } from './amp-context.js';
 import { useHasEverLoaded } from './amp-react-utils.js';
-const {
-  useContext
-} = React;
 
 /**
  * @return {boolean}
@@ -50,8 +47,7 @@ function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
 export function AmpImg(props) {
-  const context = useContext(AmpContext);
-  const renderable = useHasEverLoaded(context);
+  const renderable = useHasEverLoaded(AmpContext);
   const attrs = {...props};
 
   attrs['decoding'] = 'async';
