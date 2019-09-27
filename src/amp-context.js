@@ -42,7 +42,9 @@ export function withAmpContext(props) {
   };
   return React.createElement(
     AmpContext.Provider,
-    {value: current},
-    props.children
+    {
+      ...props,
+      value: current,
+    }
   );
 }
