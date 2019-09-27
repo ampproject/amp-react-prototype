@@ -18,6 +18,7 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   AmpContext,
 } from './amp-context.js';
+import { useHasEverLoaded } from './amp-react-utils.js';
 
 /**
  * @return {boolean}
@@ -35,109 +36,36 @@ function testSrcsetSupport() {
 function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
   const {src, srcSet} = props;
   if (src !== undefined || testSrcsetSupport()) {
-    return src;
+    return;
   }
   const match = /\S+/.exec(srcSet);
-  return match ? match[0] : undefined;
+  props['src'] = match ? match[0] : undefined;
 }
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-export class AmpImg extends React.Component {
-  /**
-   * @param {!Object} props
-   */
-  constructor(props) {
-    super(props);
+export function AmpImg(props) {
+  const renderable = useHasEverLoaded();
+  const attrs = {...props};
 
-    this.state = {
-      prerender: true,
-      element: props['i-amphtml-element'],
-      layoutWidth: 0,
-    };
+  attrs['decoding'] = 'async';
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = !!props['noprerender'];
-
-    /** @private {number} */
-    this.currentSizesWidth_ = 0;
-
-    /** @private {string|undefined} */
-    this.currentSizes_ = undefined;
+  if (renderable) {
+    guaranteeSrcForSrcsetUnsupportedBrowsers(attrs);
+  } else {
+    delete attrs['src'];
+    delete attrs['srcSet'];
   }
 
-  /**
-   * @return {*}
-   */
-  render() {
-    const context = this.context;
-
-    const props = Object.assign({}, this.props);
-
-    const { id } = this.props;
-    if (id) {
-      props['amp-img-id'] = id;
-    }
-    props['src'] = guaranteeSrcForSrcsetUnsupportedBrowsers(props);
-    props['sizes'] = this.maybeGenerateSizes_(props['sizes']);
-    props['decoding'] = 'async';
-
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (!context.renderable) {
-      delete props['src'];
-      delete props['srcSet'];
-    }
-
-    return React.createElement('img', props);
-  }
-
-  /**
-   * @param {string|undefined} sizes
-   * @return {string|undefined}
-   * @private
-   */
-  maybeGenerateSizes_(sizes) {
-    if (sizes) {
-      return sizes;
-    }
-    const { 'i-amphtml-layout': layout, srcSet } = this.props;
-    if (layout === 'intrinsic') {
-      return;
-    }
-
-    if (!srcSet || /[0-9]+x(?:,|$)/.test(srcSet)) {
-      return;
-    }
-
-    const { layoutWidth } = this.state;
-    if (!layoutWidth || layoutWidth <= this.currentSizesWidth_) {
-      return this.currentSizes_;
-    }
-    this.currentSizesWidth_ = layoutWidth;
-
-    const viewportWidth = this.state.element.getViewport().getWidth();
-
-    const entry = `(max-width: ${viewportWidth}px) ${layoutWidth}px, `;
-    let defaultSize = layoutWidth + 'px';
-
-    if (layout !== 'fixed') {
-      const ratio = Math.round((layoutWidth * 100) / viewportWidth);
-      defaultSize = Math.max(ratio, 100) + 'vw';
-    }
-
-    return (this.currentSizes_ = entry + defaultSize);
-  }
+  return React.createElement('img', attrs);
 }
-
-AmpImg.contextType = AmpContext;
 
 const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
   className: 'i-amphtml-fill-content i-amphtml-replaced-content',
   attrs: {
+    'id': {prop: 'amp-img-id'},
     'src': {prop: 'src'},
     'srcset': {prop: 'srcSet'},
   },

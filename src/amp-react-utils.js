@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { AmpContext } from './amp-context.js';
 const {
   useEffect,
   useRef,
   useState,
+  useContext,
 } = React;
 
 
@@ -98,4 +100,22 @@ export function useResizeEffect(elementRef, callback) {
 
 export function useMountEffect(callback) {
   useEffect(callback, [/* mount-only effect*/]);
+}
+
+/**
+ * Determines if the component has ever been given permission to load.
+ *
+ * This is useful components that are not expensive after initial render,
+ * especially if it would be more expensive to unload then reload them later.
+ * Think, <amp-img>, which is just fine to keep rendered after its loaded.
+ *
+ * @return {boolean}
+ */
+export function useHasEverLoaded() {
+  const context = useContext(AmpContext);
+  const state = useRef(false);
+  if (context.renderable) {
+    state.current = true;
+  }
+  return state.current;
 }

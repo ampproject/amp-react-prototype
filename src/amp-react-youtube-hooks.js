@@ -17,6 +17,7 @@
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import devAssert from './dev-assert.js';
 import { AmpContext } from './amp-context.js';
+import { useHasEverLoaded } from './amp-react-utils.js';
 
 const {
   useContext,
@@ -58,9 +59,6 @@ const PlayerFlags = {
 export function AmpYoutubeHooks(props) {
   const context = useContext(AmpContext);
   const iframeRef = useRef();
-  // TBD: This is just a demonstration. In reality, this doesn't work
-  // correctly since it unloads images unnecessary. The `playable` property,
-  // however, would work better in this scheme.
 
   useEffect(() => {
     if (!iframeRef.current) {
@@ -72,8 +70,8 @@ export function AmpYoutubeHooks(props) {
     }
   }, [context.playable]);
 
-  // TODO: use `useHasBeenLoaded` once ready.
-  if (!context.renderable) {
+  const renderable = useHasEverLoaded();
+  if (!renderable) {
     return null;
   }
 
@@ -82,7 +80,7 @@ export function AmpYoutubeHooks(props) {
     'ref': iframeRef,
     'frameBorder': 0,
     'allowFullScreen': true,
-    'allow': 'autoplay;',    
+    'allow': 'autoplay;',
     'src': getVideoIframeSrc_(props),
   };
   return React.createElement('iframe', attrs);
@@ -167,7 +165,7 @@ function getVideoIframeSrc_(props) {
 
   return addParamsToUrl(src, params);
 }
-  
+
 /**
  * @param {?HTMLIframeElement} iframe
  * @param {string} command
