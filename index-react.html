@@ -7,10 +7,10 @@
 
   <script src="https://unpkg.com/preact@10.0.0-rc.3/dist/preact.umd.js"></script>
   <script src="https://unpkg.com/preact@10.0.0-rc.3/hooks/dist/hooks.umd.js"></script>
+  <script src="https://unpkg.com/preact@10.0.0-rc.3/compat/dist/compat.umd.js"></script>
   <script>
-    window.React = window.preact;
+    window.React = Object.assign({}, preact, preactHooks, preactCompat);
   </script>
-  <!-- TOOD: react-router-dom is not compatible with preact -->
   <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
