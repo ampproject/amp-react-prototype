@@ -22,7 +22,7 @@ const {
   useLayoutEffect,
   useRef,
   useState,
-} = React;
+} = preactHooks;
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
@@ -36,7 +36,7 @@ export function AmpSize(props) {
     el.textContent = `${width}x${height}`;
   });
 
-  return React.createElement('div', {
+  return preact.createElement('div', {
     ref: sizeRef,
     style: props.style,
   });

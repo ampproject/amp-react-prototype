@@ -21,7 +21,7 @@ import {withAmpContext} from './amp-context.js';
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-export class AmpCarousel extends React.Component {
+export class AmpCarousel extends preact.Component {
 
   /**
    * @param {!Object} props
@@ -33,7 +33,7 @@ export class AmpCarousel extends React.Component {
       currentSlide: props.currentSlide || 0,
     };
 
-    this.scrollerRef_ = React.createRef();
+    this.scrollerRef_ = preact.createRef();
   }
 
   /**
@@ -86,17 +86,17 @@ export class AmpCarousel extends React.Component {
           justifyContent: 'center',
           scrollSnapAlign: 'start',
         };
-        return React.createElement(
+        return preact.createElement(
           withAmpContext,
           {
             renderable: index == this.state.currentSlide,
             playable: index == this.state.currentSlide,
           },
-          React.createElement('div', props, child)
+          preact.createElement('div', props, child)
         );
       });
 
-      return React.createElement('div', props, slides);
+      return preact.createElement('div', props, slides);
     };
 
     // Navigation arrows.
@@ -121,11 +121,11 @@ export class AmpCarousel extends React.Component {
           // Other styles.
           background: 'rgba(0, 0, 0, 0.25)',
         };
-        button = React.createElement('button', props, dir < 0 ? '<<' : '>>');
+        button = preact.createElement('button', props, dir < 0 ? '<<' : '>>');
       }
 
       const nextSlide = this.state.currentSlide + dir;
-      return React.cloneElement(button, {
+      return preact.cloneElement(button, {
         // TBD: For some reason this click listener is not working on a slot.
         //      It works fine on the default button though.
         onClick: this.navHandler_.bind(this, dir),
@@ -135,7 +135,7 @@ export class AmpCarousel extends React.Component {
       });
     };
 
-    return React.createElement('div', {
+    return preact.createElement('div', {
       style: {
         position: 'relative',
         overflow: 'hidden',

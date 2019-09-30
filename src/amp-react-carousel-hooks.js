@@ -23,7 +23,7 @@ const {
   useLayoutEffect,
   useRef,
   useState,
-} = React;
+} = preactHooks;
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
@@ -110,18 +110,18 @@ export function AmpCarouselHooks(props) {
         justifyContent: 'center',
         scrollSnapAlign: 'start',
       };
-      return React.createElement(
+      return preact.createElement(
         withAmpContext,
         {
           key: `slide-${index}`,
           renderable: index == currentSlide,
           playable: index == currentSlide,
         },
-        React.createElement('div', outs, child)
+        preact.createElement('div', outs, child)
       );
     });
 
-    return React.createElement('div', outs, slideElements);
+    return preact.createElement('div', outs, slideElements);
   };
 
   // Navigation arrows.
@@ -147,11 +147,11 @@ export function AmpCarouselHooks(props) {
         // Other styles.
         background: 'rgba(0, 0, 0, 0.25)',
       };
-      button = React.createElement('button', outs, dir < 0 ? '<<' : '>>');
+      button = preact.createElement('button', outs, dir < 0 ? '<<' : '>>');
     }
 
     const nextSlide = currentSlide + dir;
-    return React.cloneElement(button, {
+    return preact.cloneElement(button, {
       key: arrowName,
       // TBD: For some reason this click listener is not working on a slot.
       //      It works fine on the default button though.
@@ -164,7 +164,7 @@ export function AmpCarouselHooks(props) {
     });
   };
 
-  return React.createElement('div', {
+  return preact.createElement('div', {
     style: {
       position: 'relative',
       overflow: 'hidden',

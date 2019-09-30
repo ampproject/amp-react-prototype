@@ -16,7 +16,7 @@
 
 const {
   useContext,
-} = React;
+} = preactHooks;
 
 
 // TBD: I think Context is actually a good way to propagate renderable
@@ -29,7 +29,7 @@ const {
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  */
-export const AmpContext = React.createContext({
+export const AmpContext = preact.createContext({
   renderable: true,
   playable: true,
 });
@@ -41,7 +41,7 @@ export function withAmpContext(props) {
     renderable: parent.renderable && props.renderable,
     playable: parent.playable && props.playable,
   };
-  return React.createElement(
+  return preact.createElement(
     AmpContext.Provider,
     {
       ...props,

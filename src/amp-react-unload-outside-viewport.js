@@ -22,7 +22,7 @@ const {
   useRef,
   useState,
   useContext,
-} = React;
+} = preactHooks;
 
 /**
  * This is just a demo to demonstrate forced unloading of child components.
@@ -53,10 +53,10 @@ export function AmpUnloadOutsideViewport(props) {
 
   const children = loaded ? props.children : null;
 
-  return React.createElement(
+  return preact.createElement(
     withAmpContext,
     context,
-    React.createElement('div', { ref: wrapper }, children)
+    preact.createElement('div', { ref: wrapper }, children)
   );
 }
 

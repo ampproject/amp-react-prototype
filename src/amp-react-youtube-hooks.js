@@ -23,7 +23,7 @@ const {
   useContext,
   useEffect,
   useRef,
-} = React;
+} = preactHooks;
 
 /**
  * @param {!Object<string, *>} props
@@ -83,7 +83,7 @@ export function AmpYoutubeHooks(props) {
     'allow': 'autoplay;',
     'src': getVideoIframeSrc_(props),
   };
-  return React.createElement('iframe', attrs);
+  return preact.createElement('iframe', attrs);
 }
 
 /**
