@@ -5,8 +5,12 @@
   <title>AMP React in React by React</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 
-  <script src="https://unpkg.com/react/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/preact@10.0.0-rc.3/dist/preact.umd.js"></script>
+  <script src="https://unpkg.com/preact@10.0.0-rc.3/hooks/dist/hooks.umd.js"></script>
+  <script src="https://unpkg.com/preact@10.0.0-rc.3/compat/dist/compat.umd.js"></script>
+  <script>
+    window.React = Object.assign({}, preact, preactHooks, preactCompat);
+  </script>
   <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
@@ -27,8 +31,12 @@
 <div id="app"></div>
 
 <script type="text/babel">
+/**
+ * @jsx preact.createElement
+ * @jsxFrag preact.Fragment
+ */
 
-class App extends React.Component {
+class App extends preact.Component {
   state = {
     slides: [0, 1, 2, 3, 4, 5],
     lightbox1Open: false,
@@ -37,7 +45,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.backButtonService = new BackButtonServiceFake();
-    this.buttonRef = React.createRef();
+    this.buttonRef = preact.createRef();
   }
 
   render() {
@@ -212,7 +220,7 @@ class BackButtonMarkerFake {
 }
 
 
-ReactDOM.render(<App/>, document.getElementById('app'))
+preact.render(<App/>, document.getElementById('app'))
 </script>
 </body>
 </html>

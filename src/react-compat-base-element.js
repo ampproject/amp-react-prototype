@@ -26,7 +26,7 @@ const {
   useContext,
   useEffect,
   useRef,
-} = React;
+} = preactHooks;
 
 /**
  * ReactCompatibleBaseElement is a compatibility wrapper around AMP's
@@ -165,7 +165,7 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         this.scheduledRender_ = 0;
       }
       if (this.container_) {
-        ReactDOM.render(React.Fragment, this.container_);
+        preact.render(preact.Fragment, this.container_);
       }
     }
 
@@ -195,12 +195,12 @@ export default function ReactCompatibleBaseElement(Component, opts) {
       // While this "creates" a new element, React's diffing will not create
       // a second instance of Component. Instead, the existing one already
       // rendered into this element will be reusued.
-      const cv = React.createElement(Component, props);
+      const cv = preact.createElement(Component, props);
 
       const context = getContextFromDom(this.element, this.context_);
-      const v = React.createElement(withAmpContext, context, cv);
+      const v = preact.createElement(withAmpContext, context, cv);
 
-      ReactDOM.render(v, this.container_);
+      preact.render(v, this.container_);
     }
 
     /** Mocks of the BaseElement base class methods/props */
@@ -539,7 +539,7 @@ function collectProps(element, opts) {
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
   if (opts.passthrough) {
-    props.children = [React.createElement(Slot)];
+    props.children = [preact.createElement(Slot)];
   } else if (opts.children) {
     const children = [];
     for (let i = 0; i < element.children.length; i++) {
@@ -691,7 +691,7 @@ function dashToCamelCase(name) {
 function createSlot(element, name, props) {
   element.setAttribute('slot', name);
   const slotProps = Object.assign({name}, props || {});
-  return React.createElement(Slot, slotProps);
+  return preact.createElement(Slot, slotProps);
 }
 
 function Slot(props) {
@@ -786,7 +786,7 @@ function Slot(props) {
 
   // TBD: Just for debug for now. but maybe can also be used for hydration?
   slotProps['i-amphtml-context'] = JSON.stringify(context);
-  return React.createElement('slot', slotProps);
+  return preact.createElement('slot', slotProps);
 }
 
 function getContextFromDom(node, context) {

@@ -59,7 +59,7 @@ export function AmpImg(props) {
     delete attrs['srcSet'];
   }
 
-  return React.createElement('img', attrs);
+  return preact.createElement('img', attrs);
 }
 
 const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
@@ -67,7 +67,7 @@ const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
   attrs: {
     'id': {prop: 'amp-img-id'},
     'src': {prop: 'src'},
-    'srcset': {prop: 'srcSet'},
+    'srcset': {prop: 'srcset'},
   },
 });
 customElements.define('amp-react-img', AmpReactImg);

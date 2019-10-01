@@ -22,7 +22,7 @@ const {
   useLayoutEffect,
   useRef,
   useState,
-} = React;
+} = preactHooks;
 
 /**
  * We'll implement all our new extensions as React/Preact Components (TBD).
@@ -137,7 +137,7 @@ export function AmpLightbox(props) {
       // Other styles.
       background: 'rgba(0, 0, 0, 0.25)',
     };
-    return React.createElement('button', outs, 'x');
+    return preact.createElement('button', outs, 'x');
   };
 
   // Creates scroller element with `overflow-x: auto`.
@@ -169,7 +169,7 @@ export function AmpLightbox(props) {
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
     };
-    return React.createElement('div', outs, closeButton(), content);
+    return preact.createElement('div', outs, closeButton(), content);
   };
 
   return container();

@@ -20,7 +20,7 @@ const {
   useRef,
   useState,
   useContext,
-} = React;
+} = preactHooks;
 
 
 /**

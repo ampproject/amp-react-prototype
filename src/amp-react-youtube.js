@@ -49,7 +49,7 @@ const PlayerFlags = {
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-export class AmpYoutube extends React.Component {
+export class AmpYoutube extends preact.Component {
   /**
    * @return {*}
    */
@@ -69,7 +69,7 @@ export class AmpYoutube extends React.Component {
       'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
       'src': this.getVideoIframeSrc_(),
     };
-    return React.createElement('iframe', props);
+    return preact.createElement('iframe', props);
   }
 
   /**
