@@ -65,7 +65,7 @@ export function AmpImg(props) {
     delete attrs['srcSet'];
   }
 
-  useLayoutEffect(props, () => {
+  useLayoutEffect(() => {
     const img = imageRef.current;
     const loadPromise = new Promise(resolve => {
       img.onload = resolve;
