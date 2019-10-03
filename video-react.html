@@ -15,6 +15,14 @@
 <div id="app"></div>
 
 <script type="text/babel">
+
+const {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} = preactHooks;
+
 /**
  * @jsx preact.createElement
  * @jsxFrag preact.Fragment
@@ -70,15 +78,15 @@ class App extends preact.Component {
 }
 
 function VideoPlayerWithProp(props) {
-  const videoRef = preactHooks.useRef(null);
+  const videoRef = useRef(null);
   const {playState, ...otherProps} = props;
-  const [playStateState, setPlayState] = preactHooks.useState();
+  const [playStateState, setPlayState] = useState();
   if (playStateState != playState) {
     setPlayState(playState);
   }
   // TBD: use layout effect just in case so that we don't lose the user gesture
   // window.
-  preactHooks.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     // TBD: the `play` method in Video object returns a Promise - a useful API.
     const video = videoRef.current;
     switch (playStateState) {
@@ -99,8 +107,8 @@ function VideoPlayerWithProp(props) {
 // has a different twist on this concept by exporting an API contract instead
 // of a DOM element itself.
 const VideoPlayerWithForward = preactCompat.forwardRef((props, ref) => {
-  const videoRef = preactHooks.useRef(null);
-  preactHooks.useImperativeHandle(ref, () => ({
+  const videoRef = useRef(null);
+  useImperativeHandle(ref, () => ({
     play() {
       return videoRef.current.play();
     },
