@@ -17,6 +17,13 @@
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import devAssert from './dev-assert.js';
 import { AmpContext } from './amp-context.js';
+import { useHasEverLoaded } from './amp-react-utils.js';
+
+const {
+  useContext,
+  useEffect,
+  useRef,
+} = preactHooks;
 
 /**
  * @param {!Object<string, *>} props
@@ -49,111 +56,132 @@ const PlayerFlags = {
  * We'll implement all our new extensions as React/Preact Components (TBD).
  * They're true Components, not AmpElements/Amp.BaseElements.
  */
-export class AmpYoutube extends preact.Component {
-  /**
-   * @return {*}
-   */
-  render() {
-    const context = this.context;
-    // TBD: This is just a demonstration. In reality, this doesn't work
-    // correctly since it unloads images unnecessary. The `playable` property,
-    // however, would work better in this scheme.
-    if (!context.renderable) {
-      return null;
-    }
+export function AmpYoutube(props) {
+  const context = useContext(AmpContext);
+  const iframeRef = useRef();
 
-    const props = {
-      'frameBorder': 0,
-      'allowFullScreen': true,
-      'allow': 'autoplay;',
-      'className': 'i-amphtml-fill-content i-amphtml-replaced-content',
-      'src': this.getVideoIframeSrc_(),
-    };
-    return preact.createElement('iframe', props);
+  useEffect(() => {
+    if (!iframeRef.current) {
+      return;
+    }
+    if (!context.playable) {
+      // Pause.
+      sendYtCommand(iframeRef.current, 'pauseVideo');
+    }
+  }, [context.playable]);
+
+  const renderable = useHasEverLoaded();
+  if (!renderable) {
+    return null;
   }
 
-  /**
-   * @return {string}
-   * @private
-   */
-  getEmbedUrl_() {
-    const {
-      videoid,
-      liveChannelid,
-      credentials,
-    } = this.props;
-    devAssert((videoid || liveChannelid) && !(videoid && liveChannelid));
-
-    let urlSuffix = '';
-    if (credentials === 'omit') {
-      urlSuffix = '-nocookie';
-    }
-
-    const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-
-    let descriptor = '';
-    if (videoid) {
-      descriptor = `${encodeURIComponent(videoid)}?`;
-    } else {
-      descriptor =
-        `live_stream?channel=${encodeURIComponent(liveChannelid)}&`;
-    }
-    return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getVideoIframeSrc_() {
-    let src = this.getEmbedUrl_();
-    const params = pick(this.props, [
-      'playsinline',
-      'iv_load_policy',
-      'loop',
-      'autoplay',
-      'playlist',
-    ]);
-
-    // Unless inline play policy is set explicitly, enable inline play for iOS
-    // in all cases similar to Android. Inline play is the desired default for
-    // video in AMP.
-    if (!('playsinline' in params)) {
-      params['playsinline'] = '1';
-    }
-
-    const hasAutoplay = this.props['autoplay'];
-    if (hasAutoplay) {
-      // Unless annotations policy is set explicitly, change the default to
-      // hide annotations when autoplay is set.
-      // We do this because we like the first user interaction with an
-      // autoplaying video to be just unmute tso annotations are not
-      // interactive during autoplay anyway.
-      if (!('iv_load_policy' in params)) {
-        params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
-      }
-
-      // Inline play must be set for autoplay regardless of original value.
-      params['playsinline'] = '1';
-    }
-
-    const loop = params['loop'] == '1';
-    const playlist = 'playlist' in params;
-    if (loop) {
-      if (playlist) {
-        // Use native looping for playlists
-        params['loop'] = '1';
-      } else if ('loop' in params) {
-        // Use js-based looping for single videos
-        delete params['loop'];
-      }
-    }
-
-    return addParamsToUrl(src, params);
-  }
+  const attrs = {
+    ...props,
+    'ref': iframeRef,
+    'frameBorder': 0,
+    'allowFullScreen': true,
+    'allow': 'autoplay;',
+    'src': getVideoIframeSrc_(props),
+  };
+  return preact.createElement('iframe', attrs);
 }
 
-AmpYoutube.contextType = AmpContext;
+/**
+ * @return {string}
+ * @private
+ */
+function getEmbedUrl_(props) {
+  const {
+    videoid,
+    liveChannelid,
+    credentials,
+  } = props;
+  devAssert((videoid || liveChannelid) && !(videoid && liveChannelid));
+
+  let urlSuffix = '';
+  if (credentials === 'omit') {
+    urlSuffix = '-nocookie';
+  }
+
+  const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+
+  let descriptor = '';
+  if (videoid) {
+    descriptor = `${encodeURIComponent(videoid)}?`;
+  } else {
+    descriptor =
+      `live_stream?channel=${encodeURIComponent(liveChannelid)}&`;
+  }
+  return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
+}
+
+/**
+ * @return {string}
+ * @private
+ */
+function getVideoIframeSrc_(props) {
+  let src = getEmbedUrl_(props);
+  const params = pick(props, [
+    'playsinline',
+    'iv_load_policy',
+    'loop',
+    'autoplay',
+    'playlist',
+  ]);
+
+  // Unless inline play policy is set explicitly, enable inline play for iOS
+  // in all cases similar to Android. Inline play is the desired default for
+  // video in AMP.
+  if (!('playsinline' in params)) {
+    params['playsinline'] = '1';
+  }
+
+  const hasAutoplay = props['autoplay'];
+  if (hasAutoplay) {
+    // Unless annotations policy is set explicitly, change the default to
+    // hide annotations when autoplay is set.
+    // We do this because we like the first user interaction with an
+    // autoplaying video to be just unmute tso annotations are not
+    // interactive during autoplay anyway.
+    if (!('iv_load_policy' in params)) {
+      params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
+    }
+
+    // Inline play must be set for autoplay regardless of original value.
+    params['playsinline'] = '1';
+  }
+
+  const loop = params['loop'] == '1';
+  const playlist = 'playlist' in params;
+  if (loop) {
+    if (playlist) {
+      // Use native looping for playlists
+      params['loop'] = '1';
+    } else if ('loop' in params) {
+      // Use js-based looping for single videos
+      delete params['loop'];
+    }
+  }
+
+  return addParamsToUrl(src, params);
+}
+
+/**
+ * @param {?HTMLIframeElement} iframe
+ * @param {string} command
+ * @param {*} opt_args
+ */
+function sendYtCommand(iframe, command, opt_args) {
+  if (!iframe || !iframe.contentWindow) {
+    return;
+  }
+  const message = JSON.stringify({
+    'event': 'command',
+    'func': command,
+    'args': opt_args || '',
+  });
+  iframe.contentWindow.postMessage(message, '*');
+}
 
 /**
  * Appends query string fields and values to a url. The `params` objects'
@@ -189,8 +217,8 @@ function appendEncodedParamStringToUrl(
     mainAndQuery[0] +
     (mainAndQuery[1]
       ? opt_addToFront
-        ? `?${paramString}&${mainAndQuery[1]}`
-        : `?${mainAndQuery[1]}&${paramString}`
+      ? `?${paramString}&${mainAndQuery[1]}`
+      : `?${mainAndQuery[1]}&${paramString}`
       : `?${paramString}`);
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
@@ -222,6 +250,7 @@ function serializeQueryString(params) {
 }
 
 const AmpReactYoutube = ReactCompatibleBaseElement(AmpYoutube, {
+  className: 'i-amphtml-fill-content i-amphtml-replaced-content',
   attrs: {
     'data-videoid': {
       prop: 'videoid',

@@ -15,15 +15,15 @@
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
     import {AmpImg} from './src/amp-react-img.js';
-    import {AmpCarouselHooks} from './src/amp-react-carousel-hooks.js';
+    import {AmpCarousel} from './src/amp-react-carousel.js';
     import {AmpLightbox} from './src/amp-react-lightbox.js';
     import {AmpSize} from './src/amp-react-size.js';
-    import {AmpYoutubeHooks} from './src/amp-react-youtube-hooks.js';
+    import {AmpYoutube} from './src/amp-react-youtube.js';
     window.AmpImg = AmpImg;
-    window.AmpCarousel = AmpCarouselHooks;
+    window.AmpCarousel = AmpCarousel;
     window.AmpLightbox = AmpLightbox;
     window.AmpSize = AmpSize;
-    window.AmpYoutubeHooks = AmpYoutubeHooks;
+    window.AmpYoutube = AmpYoutube;
   </script>
 </head>
 <body>
@@ -126,7 +126,7 @@ class App extends preact.Component {
           )}
           >
           {this.state.slides.map(index => index == 1 ? (
-            <AmpYoutubeHooks
+            <AmpYoutube
                 key="slide-yt"
                 id="c1_yt1"
                 videoid="TEcvbWCYFZg"
@@ -163,12 +163,12 @@ class App extends preact.Component {
           style={{width: '300px', height: '90px'}}
           >
         </AmpImg>
-        <AmpYoutubeHooks
+        <AmpYoutube
             id="myVideo2"
             videoid="lBTCB7yLs8Y"
             style={{width: '358px', height: '204px'}}
             >
-        </AmpYoutubeHooks>
+        </AmpYoutube>
       </main>
     )
   }

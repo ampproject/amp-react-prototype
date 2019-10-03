@@ -176,11 +176,9 @@
     <script src="https://unpkg.com/preact@10.0.0-rc.3/hooks/dist/hooks.umd.js"></script>
     <script type="module" src="./src/amp-react-img.js"></script>
     <script type="module" src="./src/amp-react-carousel.js"></script>
-    <script type="module" src="./src/amp-react-carousel-hooks.js"></script>
     <script type="module" src="./src/amp-react-lightbox.js"></script>
     <script type="module" src="./src/amp-react-size.js"></script>
     <script type="module" src="./src/amp-react-youtube.js"></script>
-    <script type="module" src="./src/amp-react-youtube-hooks.js"></script>
     <script type="module" src="./src/amp-react-unload-outside-viewport.js"></script>
     <script>
       function addSlide() {
@@ -244,75 +242,9 @@
       width=300
       height=90>
     </amp-react-img>
-
-    <!-- TBD: display:block is pretty important here. Whose job is to set it and when? -->
-    <amp-react-carousel
-      id="c1"
-      layout="responsive"
-      width=300
-      height=150
-      style="display: block;"
-      current-slide="1">
-      <div>
-        <amp-react-img
-          id="c1_slide1_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide0"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <div>
-        <amp-react-img
-          id="c1_slide1_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide1"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <div>
-        <amp-react-img
-          id="c1_slide2_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide2"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <div>
-        <amp-react-img
-          id="c1_slide2_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide3"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <div>
-        <amp-react-img
-          id="c1_slide2_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide4"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <div>
-        <amp-react-img
-          id="c1_slide2_img"
-          alt="bindable"
-          src="https://via.placeholder.com/90x90.png?text=slide5"
-          width=90
-          height=90>
-        </amp-react-img>
-      </div>
-      <!-- TBD: is this convenient to position buttons here? -->
-      <button arrow-next style="position: absolute; right: 8px; top: calc(50% - 16px)">&rarr;</button>
-    </amp-react-carousel>
   
     <!-- TBD: display:block is pretty important here. Whose job is to set it and when? -->
-    <amp-react-carousel-hooks
+    <amp-react-carousel
       id="c2"
       layout="responsive"
       width=300
@@ -329,12 +261,12 @@
         </amp-react-img>
       </div>
       <div>
-        <amp-react-youtube-hooks
+        <amp-react-youtube
             id="c2_slide1_yt"
             data-videoid="TEcvbWCYFZg"
             width="120"
             height="90">
-        </amp-react-youtube-hooks>
+        </amp-react-youtube>
       </div>
       <div>
         <amp-react-img
@@ -374,7 +306,7 @@
       </div>
       <!-- TBD: is this convenient to position buttons here? -->
       <button arrow-next style="position: absolute; right: 8px; top: calc(50% - 16px)">&rarr;</button>
-    </amp-react-carousel-hooks>
+    </amp-react-carousel>
 
     <div style="margin: 8px 0;">
       <button onclick="addSlide()">Add slide</button>
@@ -409,19 +341,12 @@
     <div style="height: 100vh">scroll down...</div>
 
     <amp-react-youtube
-        id="myVideo"
-        data-videoid="lBTCB7yLs8Y"
-        width="358"
-        height="204"
-        layout="responsive">
-    </amp-react-youtube>
-    <amp-react-youtube-hooks
         id="myVideo2"
         data-videoid="lBTCB7yLs8Y"
         width="358"
         height="204"
         layout="responsive">
-    </amp-react-youtube-hooks>
+    </amp-react-youtube>
 
   </body>
 </html>
