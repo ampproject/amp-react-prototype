@@ -113,7 +113,7 @@ export function AmpCarouselHooks(props) {
       return preact.createElement(
         withAmpContext,
         {
-          key: `slide-${index}`,
+          key: `slide-${child.key || index}`,
           renderable: index == currentSlide,
           playable: index == currentSlide,
         },
