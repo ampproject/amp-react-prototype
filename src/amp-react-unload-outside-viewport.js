@@ -24,11 +24,7 @@ const {
   useContext,
 } = preactHooks;
 
-/**
- * This is just a demo to demonstrate forced unloading of child components.
- * It'll remove the children from the DOM tree when outside viewport, and
- * reinsert new children when in viewport.
- */
+
 export function AmpUnloadOutsideViewport(props) {
   const wrapper = useRef(null);
   const [loaded, setLoad] = useState(false);

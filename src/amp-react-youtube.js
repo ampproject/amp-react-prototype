@@ -26,24 +26,6 @@ const {
 } = preactHooks;
 
 /**
- * @param {!Object<string, *>} props
- * @param {!Array<string>} keys
- * @param {Array<string>=} renames
- * @return {!Object<string, *>}
- */
-function pick(props, keys, renames = keys) {
-  const out = {};
-  for (let i = 0; i < keys.length; i++) {
-    const value = props[keys[i]];
-    if (value !== undefined) {
-      out[renames[i]] = value;
-    }
-  }
-
-  return out;
-}
-
-/**
  * @enum {number}
  * @private
  */
@@ -52,10 +34,7 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
-/**
- * We'll implement all our new extensions as React/Preact Components (TBD).
- * They're true Components, not AmpElements/Amp.BaseElements.
- */
+
 export function AmpYoutube(props) {
   const context = useContext(AmpContext);
   const iframeRef = useRef();
@@ -164,6 +143,24 @@ function getVideoIframeSrc_(props) {
   }
 
   return addParamsToUrl(src, params);
+}
+
+/**
+ * @param {!Object<string, *>} props
+ * @param {!Array<string>} keys
+ * @param {Array<string>=} renames
+ * @return {!Object<string, *>}
+ */
+function pick(props, keys, renames = keys) {
+  const out = {};
+  for (let i = 0; i < keys.length; i++) {
+    const value = props[keys[i]];
+    if (value !== undefined) {
+      out[renames[i]] = value;
+    }
+  }
+
+  return out;
 }
 
 /**

@@ -24,10 +24,7 @@ const {
   useState,
 } = preactHooks;
 
-/**
- * We'll implement all our new extensions as React/Preact Components (TBD).
- * They're true Components, not AmpElements/Amp.BaseElements.
- */
+
 export function AmpLightbox(props) {
   const content = props.children || [];
 

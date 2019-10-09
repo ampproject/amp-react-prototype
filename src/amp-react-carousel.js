@@ -25,10 +25,7 @@ const {
   useState,
 } = preactHooks;
 
-/**
- * We'll implement all our new extensions as React/Preact Components (TBD).
- * They're true Components, not AmpElements/Amp.BaseElements.
- */
+
 export function AmpCarousel(props) {
   const slides = props.children || [];
 
@@ -54,13 +51,12 @@ export function AmpCarousel(props) {
     // TBD: Is this a good idea to manage currentSlide via state? Amount of
     // re-rendering is very small and mostly affects `scrollLeft`, which is
     // not renderable at all.
-    // TBD: Ideally we need to wait for scrolling to complete. A lot of
-    // problems caused by snapping and smooth scrolling here.
+    // TBD: Ideally we need to wait for "scrollend" event, that's still WIP
+    // in most of browsers.
     const scroller = scrollerRef.current;
     const x = scroller.scrollLeft;
     const slide = Math.round(x / scroller.offsetWidth);
     setCurrentSlide(slide);
-    // TBD: Dispatch the "slide-change" event. But how to do this in React?
   }
 
 
@@ -153,13 +149,9 @@ export function AmpCarousel(props) {
     const nextSlide = currentSlide + dir;
     return preact.cloneElement(button, {
       key: arrowName,
-      // TBD: For some reason this click listener is not working on a slot.
-      //      It works fine on the default button though.
       onClick: () => {
         setCurrentSlide(currentSlide + dir);
       },
-      // TBD: this is cute, but `[disabled]` doesn't propagate from slot to
-      // the actual button.
       disabled: nextSlide < 0 || nextSlide >= slides.length,
     });
   };
