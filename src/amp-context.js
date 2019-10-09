@@ -19,10 +19,6 @@ const {
 } = preactHooks;
 
 
-// TBD: I think Context is actually a good way to propagate renderable
-// properties _out_ of components. But it might be better to provide
-// context properties (along with services) as direct component properties.
-
 /**
  * - renderable: whether this vDOM area is renderable. Analogous to
  *   `display-locking` CSS.
@@ -35,6 +31,9 @@ export const AmpContext = preact.createContext({
 });
 
 
+/**
+ * A wrapper-component that recalculates and propagates AmpContext properties.
+ */
 export function withAmpContext(props) {
   const parent = useContext(AmpContext);
   const current = {

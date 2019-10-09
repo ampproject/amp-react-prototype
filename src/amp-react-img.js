@@ -20,6 +20,23 @@ import {
 } from './amp-context.js';
 import { useHasEverLoaded } from './amp-react-utils.js';
 
+
+export function AmpImg(props) {
+  const renderable = useHasEverLoaded();
+  const attrs = {...props};
+
+  attrs['decoding'] = 'async';
+
+  if (renderable) {
+    guaranteeSrcForSrcsetUnsupportedBrowsers(attrs);
+  } else {
+    delete attrs['src'];
+    delete attrs['srcSet'];
+  }
+
+  return preact.createElement('img', attrs);
+}
+
 /**
  * @return {boolean}
  */
@@ -42,25 +59,6 @@ function guaranteeSrcForSrcsetUnsupportedBrowsers(props) {
   props['src'] = match ? match[0] : undefined;
 }
 
-/**
- * We'll implement all our new extensions as React/Preact Components (TBD).
- * They're true Components, not AmpElements/Amp.BaseElements.
- */
-export function AmpImg(props) {
-  const renderable = useHasEverLoaded();
-  const attrs = {...props};
-
-  attrs['decoding'] = 'async';
-
-  if (renderable) {
-    guaranteeSrcForSrcsetUnsupportedBrowsers(attrs);
-  } else {
-    delete attrs['src'];
-    delete attrs['srcSet'];
-  }
-
-  return preact.createElement('img', attrs);
-}
 
 const AmpReactImg = ReactCompatibleBaseElement(AmpImg, {
   className: 'i-amphtml-fill-content i-amphtml-replaced-content',
