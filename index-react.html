@@ -222,6 +222,33 @@ class App extends preact.Component {
           <button onClick={() => this.setState({selector1Value: '2'})}>Select option 2</button>
         </div>
 
+        <AmpSelector style={{width: '100%', height: '80px', border: '1px dotted lightgray'}}
+            value={this.state.selector1Value}
+            onChange={event => this.setState({selector1Value: event.target.value})}>
+          <ul>
+            <AmpSelector.Option
+                // TBD: style 1: tagName+content.
+                option="1"
+                tagName="li"
+                >
+              Option 1
+            </AmpSelector.Option>
+            <AmpSelector.Option
+                // TBD: style 2: render-function.
+                option="2"
+                render={props => (
+                  <li {...props}>Option 2</li>
+                )}>
+            </AmpSelector.Option>
+            <AmpSelector.Option
+                option="3"
+                render={props => (
+                  <li {...props}>Option 3</li>
+                )}>
+            </AmpSelector.Option>
+          </ul>
+        </AmpSelector>
+
         <div style={{height: '500vh'}}>scroll down...</div>
         <AmpImg
           id="last"
