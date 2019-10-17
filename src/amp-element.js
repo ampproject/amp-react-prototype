@@ -246,6 +246,7 @@ function applyStaticLayout(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-sizer');
     setStyles(sizer, {
       paddingTop:
         (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
@@ -257,7 +258,7 @@ function applyStaticLayout(element) {
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-sizer">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;

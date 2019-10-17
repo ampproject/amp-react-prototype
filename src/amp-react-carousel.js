@@ -158,9 +158,9 @@ export function AmpCarousel(props) {
 
   return preact.createElement('div', {
     style: {
+      ...props.style,
       position: 'relative',
       overflow: 'hidden',
-      height: '100px',
     },
     // Just for debugging.
     'debug-current-slide': currentSlide,

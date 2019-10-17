@@ -35,7 +35,14 @@ export function AmpSize(props) {
 
   return preact.createElement('div', {
     ref: sizeRef,
-    style: props.style,
+    style: {
+      ...props.style,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
   });
 }
 
