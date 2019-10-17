@@ -182,6 +182,12 @@
     <script type="module" src="./src/amp-react-youtube.js"></script>
     <script type="module" src="./src/amp-react-unload-outside-viewport.js"></script>
     <script type="module" src="./src/amp-react-fit-text.js"></script>
+    <script type="module" src="./src/amp-react-selector.js"></script>
+    <style>
+      li[selected] {
+        font-weight: bold;
+      }
+    </style>
     <script>
       function addSlide() {
         [c1, c2].forEach(function(carousel) {
@@ -329,6 +335,17 @@
       style="border: 1px dotted lightgray;">
       Can you fit this text?
     </amp-fit-text>
+
+    <amp-react-selector
+      id="selector1"
+      layout="container"
+      style="border: 1px dotted lightgray;">
+      <ul>
+        <li option="1" selected>Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+      </ul>
+    </amp-react-selector>
 
     <div style="height: 500vh">scroll down...</div>
 

@@ -183,7 +183,9 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         this.container_.style.right = '0';
         this.container_.style.bottom = '0';
         this.customProps_.style = {width: '100%', height: '100%'};
-        if (opts.children || opts.passthrough) {
+        if (opts.template) {
+          // Do not attach container. It will be used as a fragment.
+        } else if (opts.children || opts.passthrough) {
           const shadowRoot = this.element.attachShadow({mode: 'open'});
           const sizerSlot = this.getWin().document.createElement('slot');
           sizerSlot.setAttribute('name', 'i-amphtml-sizer');

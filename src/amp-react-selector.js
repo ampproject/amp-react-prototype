@@ -20,31 +20,79 @@ import {
 } from './amp-context.js';
 
 const {
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } = preactHooks;
 
-const LINE_HEIGHT_EM = 1.15;
+
+export const AmpSelectorContext = preact.createContext();
 
 
 export function AmpSelector(props) {
-  return preact.createElement('div', {
-    ...props,
-  }, props.children);
+  const {multiple, value, defaultValue} = props;
+  const [selected, setSelectedState] = useState(
+    value ? [].concat(value) :
+    defaultValue ? [].concat(defaultValue) :
+    []);
+  const setSelectedRef = useRef(value => {
+    if (props.onChange) {
+      props.onChange({target: {value: multiple ? value : value[0]}});
+    }
+    setSelectedState(value);
+  });
+  return preact.createElement(
+    props.tagName || 'div',
+    {
+      ...props,
+    },
+    preact.createElement(
+      AmpSelectorContext.Provider,
+      {
+        ...props,
+        value: {
+          multiple,
+          // TBD: controlled values require override of properties.
+          selected: value ? [].concat(value) : selected,
+          setSelected: setSelectedRef.current,
+        },
+      }
+    )
+  );
 }
 
-
 AmpSelector.Option = function(props) {
-  // QQQQ: Context
-  useEffect(() => {
+  const {option} = props;
+  const selectorContext = useContext(AmpSelectorContext);
+  const {selected, setSelected, multiple} = selectorContext;
+  const optionProps = {
+    ...props,
+    option,
+    selected: selected.includes(option),
+    onClick: () => selectOption(option, multiple, selected, setSelected),
+  };
+  if (props.render) {
+    return props.render(optionProps);
+  }
+  return preact.createElement(
+    props.tagName || 'div',
+    optionProps,
+    props.children);
+}
 
-  });
-  return props.render({
-    option: props.option,
-    selected: props.selected || false,
-  });
+function selectOption(option, multiple, selected, setSelected) {
+  if (multiple) {
+    setSelected(
+      selected.includes(option) ?
+      selected.filter(v => v != option) :
+      selected.concat(option));
+  } else {
+    if (!selected.includes(option)) {
+      setSelected([option]);
+    }
+  }
 }
 
 
@@ -52,8 +100,45 @@ const AmpReactSelector = ReactCompatibleBaseElement(AmpSelector, {
   className: 'i-amphtml-fill-content i-amphtml-replaced-content',
   attrs: {
   },
-  children: {
-    'children': '*',
+  template: true,
+  // TODO: simply override ReactBaseElement instead.
+  init(reactBaseElement) {
+    const {element} = reactBaseElement;
+    const mu = new MutationObserver(records => {
+      rebuild();
+    });
+    const rebuild = () => {
+      const children = [];
+      const optionChildren = element.querySelectorAll('[option]');
+      const value = [];
+      optionChildren.forEach(child => {
+        // TODO: check that an option is not within another option.
+        const option = child.getAttribute('option');
+        const props = {
+          option,
+          render: props => {
+            // TBD: This is sort of similar to our Slot logic.
+            if (props.selected) {
+              child.setAttribute('selected', '');
+            } else {
+              child.removeAttribute('selected');
+            }
+            child.onclick = props.onClick;
+
+            // Skip mutations to avoid cycles.
+            mu.takeRecords();
+          },
+        };
+        if (child.hasAttribute('selected')) {
+          value.push(option);
+        }
+        children.push(preact.createElement(AmpSelector.Option, props));
+      });
+
+      reactBaseElement.mutateProps({defaultValue: value, children});
+    };
+    mu.observe(element, {attributeFilter: ['option', 'selected'], subtree: true});
+    setTimeout(rebuild);
   },
 });
 customElements.define('amp-react-selector', AmpReactSelector);
