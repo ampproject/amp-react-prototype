@@ -180,6 +180,7 @@
     <script type="module" src="./src/amp-react-size.js"></script>
     <script type="module" src="./src/amp-react-youtube.js"></script>
     <script type="module" src="./src/amp-react-unload-outside-viewport.js"></script>
+    <script type="module" src="./src/amp-react-fit-text.js"></script>
     <script>
       function addSlide() {
         [c1, c2].forEach(function(carousel) {
@@ -199,7 +200,6 @@
     </script>
   </head>
   <body>
-
     <amp-react-lightbox id="lightbox1" hidden transition-anchor="button1">
       <div>This is a lightbox</div>
 
@@ -242,14 +242,13 @@
       width=300
       height=90>
     </amp-react-img>
-  
+
     <!-- TBD: display:block is pretty important here. Whose job is to set it and when? -->
     <amp-react-carousel
       id="c2"
       layout="responsive"
       width=300
-      height=150
-      style="display: block;"
+      height=100
       current-slide="1">
       <div>
         <amp-react-img
@@ -317,9 +316,18 @@
       id="s1"
       layout="responsive"
       width=300
-      height=150
+      height=50
       style="display: block;">
     </amp-react-size>
+
+    <amp-fit-text
+      id="aft1"
+      layout="responsive"
+      width=300
+      height=80
+      style="border: 1px dotted lightgray;">
+      Can you fit this text?
+    </amp-fit-text>
 
     <div style="height: 500vh">scroll down...</div>
 

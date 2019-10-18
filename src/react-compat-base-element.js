@@ -173,16 +173,22 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     rerender_() {
       if (!this.container_) {
         // TBD: create container/shadow in the amp-element.js?
+        this.container_ = this.getWin().document.createElement('i-amphtml-c');
+        // TBD: we want `position:absolute` in a few layouts only.
+        this.container_.style.display = 'block';
+        this.container_.style.position = 'absolute';
+        this.container_.style.top = '0';
+        this.container_.style.left = '0';
+        this.container_.style.right = '0';
+        this.container_.style.bottom = '0';
+        this.customProps_.style = {width: '100%', height: '100%'};
         if (opts.children || opts.passthrough) {
-          this.container_ = this.element.attachShadow({mode: 'open'});
+          const shadowRoot = this.element.attachShadow({mode: 'open'});
+          const sizerSlot = this.getWin().document.createElement('slot');
+          sizerSlot.setAttribute('name', 'i-amphtml-sizer');
+          shadowRoot.appendChild(sizerSlot);
+          shadowRoot.appendChild(this.container_);
         } else {
-          this.container_ = this.getWin().document.createElement('i-amphtml-c');
-          // TBD: we only want `position:absolute` in a few layouts really.
-          this.container_.style.position = 'absolute';
-          this.container_.style.top = '0';
-          this.container_.style.left = '0';
-          this.container_.style.right = '0';
-          this.container_.style.bottom = '0';
           this.element.appendChild(this.container_);
         }
       }
