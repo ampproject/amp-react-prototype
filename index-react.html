@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
+    import {AmpAccordion} from './src/amp-react-accordion.js';
     import {AmpCarousel} from './src/amp-react-carousel.js';
     import {AmpFitText} from './src/amp-react-fit-text.js';
     import {AmpImg} from './src/amp-react-img.js';
@@ -23,6 +24,7 @@
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutube} from './src/amp-react-youtube.js';
     Object.assign(window, {
+      AmpAccordion,
       AmpCarousel,
       AmpImg,
       AmpFitText,
@@ -222,32 +224,43 @@ class App extends preact.Component {
           <button onClick={() => this.setState({selector1Value: '2'})}>Select option 2</button>
         </div>
 
-        <AmpSelector style={{width: '100%', height: '80px', border: '1px dotted lightgray'}}
-            value={this.state.selector1Value}
-            onChange={event => this.setState({selector1Value: event.target.value})}>
-          <ul>
-            <AmpSelector.Option
-                // TBD: style 1: tagName+content.
-                option="1"
-                tagName="li"
-                >
-              Option 1
-            </AmpSelector.Option>
-            <AmpSelector.Option
-                // TBD: style 2: render-function.
-                option="2"
-                render={props => (
-                  <li {...props}>Option 2</li>
-                )}>
-            </AmpSelector.Option>
-            <AmpSelector.Option
-                option="3"
-                render={props => (
-                  <li {...props}>Option 3</li>
-                )}>
-            </AmpSelector.Option>
-          </ul>
-        </AmpSelector>
+        <AmpAccordion style={{border: '1px dotted lightgray'}}>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            defaultExpanded
+            //expanded={'1' == this.state.accordion1Expanded}
+            //onExpand={() => this.setState({accordion1Expanded: '1'})}
+            header={(
+              <h3>Section 1</h3>
+            )}>
+            <div>Content of section 1</div>
+          </AmpAccordion.Section>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            //expanded={'2' == this.state.accordion1Expanded}
+            //onExpand={() => this.setState({accordion1Expanded: '2'})}
+            header={(
+              <h3>Section 2</h3>
+            )}>
+            <div>Content of section 2
+              <AmpYoutube
+                  id="accordion1_section2_yt1"
+                  videoid="TEcvbWCYFZg"
+                  style={{width: '120px', height: '90px'}}
+                  />
+            </div>
+          </AmpAccordion.Section>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            //expanded={'3' == this.state.accordion1Expanded}
+            //onExpand={() => this.setState({accordion1Expanded: '3'})}
+            disabled
+            header={(
+              <h3>Section 3</h3>
+            )}>
+            <div>Content of section 3</div>
+          </AmpAccordion.Section>
+        </AmpAccordion>
 
         <div style={{height: '500vh'}}>scroll down...</div>
         <AmpImg

@@ -72,11 +72,13 @@ export function Slot(props) {
         const { attributes } = slot;
         for (let i = 0, l = attributes.length; i < l; i++) {
           const { name, value } = attributes[i];
-          if (name == 'name') {
-            // This is the slot's name.
-          } else if (!node.hasAttribute(name)) {
-            // TBD: this means that attributes can be rendered only once?
-            // TBD: what do we do with style and class?
+          if (name == 'name' ||
+              name == 'class' ||
+              name == 'style' ||
+              name == 'i-amphtml-context') {
+            // This is the slot's name or other internal attributes.
+          } else {
+            // TBD: switch to explicit definition of "supported" attributes.
             node.setAttribute(name, value);
           }
         }
@@ -84,6 +86,7 @@ export function Slot(props) {
         node.disabled = slot.hasAttribute('disabled');
         node.hidden = slot.hasAttribute('hidden');
         toggleAttribute(node, 'selected', slot.hasAttribute('selected'));
+        toggleAttribute(node, 'expanded', slot.hasAttribute('expanded'));
         if (!node['i-amphtml-event-distr']) {
           node['i-amphtml-event-distr'] = true;
           node.addEventListener('click', e => {
