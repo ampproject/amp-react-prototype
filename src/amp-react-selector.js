@@ -18,6 +18,7 @@ import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   AmpContext,
 } from './amp-context.js';
+import {Slot} from './slot.js';
 
 const {
   useContext,
@@ -77,7 +78,7 @@ AmpSelector.Option = function(props) {
     return props.render(optionProps);
   }
   return preact.createElement(
-    props.tagName || 'div',
+    props.type || props.tagName || 'div',
     optionProps,
     props.children);
 }
@@ -116,15 +117,10 @@ const AmpReactSelector = ReactCompatibleBaseElement(AmpSelector, {
         const option = child.getAttribute('option');
         const props = {
           option,
-          render: props => {
-            // TBD: This is sort of similar to our Slot logic.
-            if (props.selected) {
-              child.setAttribute('selected', '');
-            } else {
-              child.removeAttribute('selected');
-            }
-            child.onclick = props.onClick;
-
+          type: Slot,
+          retarget: true,
+          assignedElements: [child],
+          postRender: () => {
             // Skip mutations to avoid cycles.
             mu.takeRecords();
           },
@@ -138,7 +134,9 @@ const AmpReactSelector = ReactCompatibleBaseElement(AmpSelector, {
       reactBaseElement.mutateProps({defaultValue: value, children});
     };
     mu.observe(element, {attributeFilter: ['option', 'selected'], subtree: true});
-    setTimeout(rebuild);
+
+    // Run the first build.
+    rebuild();
   },
 });
 customElements.define('amp-react-selector', AmpReactSelector);

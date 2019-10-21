@@ -49,6 +49,8 @@ export function Slot(props) {
   const slotProps = Object.assign({}, props, {ref});
   useEffect(() => {
     const slot = ref.current;
+    const assignedElements = getAssignedElements(props, slot);
+    slot.__assignedElements = assignedElements;
 
     // Retarget slots and content.
     if (props.retarget) {
@@ -57,7 +59,7 @@ export function Slot(props) {
       //    `hidden`. Similarly do other attributes.
       // 2. Re-propagate click events to slots since React stops propagation.
       //    See https://github.com/facebook/react/issues/9242.
-      slot.assignedElements().forEach(node => {
+      assignedElements.forEach(node => {
         // Basic attributes:
         const { attributes } = slot;
         for (let i = 0, l = attributes.length; i < l; i++) {
@@ -73,6 +75,7 @@ export function Slot(props) {
         // Boolean attributes:
         node.disabled = slot.hasAttribute('disabled');
         node.hidden = slot.hasAttribute('hidden');
+        toggleAttribute(node, 'selected', slot.hasAttribute('selected'));
         if (!node['i-amphtml-event-distr']) {
           node['i-amphtml-event-distr'] = true;
           node.addEventListener('click', e => {
@@ -98,7 +101,7 @@ export function Slot(props) {
       slot['i-amphtml-context'] = context;
       // TODO: Switch to fast child-node discover. See Revamp for the algo.
       const affectedNodes = [];
-      slot.assignedElements().forEach(node => {
+      assignedElements.forEach(node => {
         affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
@@ -111,6 +114,11 @@ export function Slot(props) {
         node.dispatchEvent(event);
       });
     }
+
+    // Post-rendering cleanup, if any.
+    if (props.postRender) {
+      props.postRender();
+    }
   });
 
   // Register an unmount listener. This can't be joined with the previous
@@ -118,8 +126,9 @@ export function Slot(props) {
   // run every render.
   useMountEffect(() => {
     return () => {
+      const slot = ref.current;
       const affectedNodes = [];
-      ref.current.assignedElements().forEach(node => {
+      getAssignedElements(props, slot).forEach(node => {
         affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
@@ -165,4 +174,16 @@ function getAmpElements(root) {
     elements.unshift(root);
   }
   return elements;
+}
+
+function getAssignedElements(props, slotElement) {
+  return props.assignedElements || slotElement.assignedElements();
+}
+
+function toggleAttribute(element, attr, on) {
+  if (on) {
+    element.setAttribute('selected', '');
+  } else {
+    element.removeAttribute('selected');
+  }
 }
