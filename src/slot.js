@@ -182,8 +182,8 @@ function getAssignedElements(props, slotElement) {
 
 function toggleAttribute(element, attr, on) {
   if (on) {
-    element.setAttribute('selected', '');
+    element.setAttribute(attr, '');
   } else {
-    element.removeAttribute('selected');
+    element.removeAttribute(attr);
   }
 }
