@@ -33,17 +33,31 @@ export const AmpSelectorContext = preact.createContext();
 
 
 export function AmpSelector(props) {
-  const {multiple, value, defaultValue} = props;
-  const [selected, setSelectedState] = useState(
+  const {value, defaultValue} = props;
+  const [selectedState, setSelectedState] = useState(
     value ? [].concat(value) :
     defaultValue ? [].concat(defaultValue) :
     []);
-  const setSelectedRef = useRef(value => {
-    if (props.onChange) {
-      props.onChange({target: {value: multiple ? value : value[0]}});
+  // TBD: controlled values require override of properties.
+  const selected = value ? [].concat(value) : selectedState;
+  const selectOption = option => {
+    const {multiple, onChange} = props;
+    let newValue = null;
+    if (multiple) {
+      newValue =
+        selected.includes(option) ?
+          selected.filter(v => v != option) :
+          selected.concat(option);
+    } else if (!selected.includes(option)) {
+      newValue = [option];
     }
-    setSelectedState(value);
-  });
+    if (newValue) {
+      setSelectedState(newValue);
+      if (onChange) {
+        onChange({target: {value: multiple ? newValue : newValue[0]}});
+      }
+    }
+  };
   return preact.createElement(
     props.tagName || 'div',
     {
@@ -53,10 +67,8 @@ export function AmpSelector(props) {
       AmpSelectorContext.Provider,
       {
         value: {
-          multiple,
-          // TBD: controlled values require override of properties.
-          selected: value ? [].concat(value) : selected,
-          setSelected: setSelectedRef.current,
+          selected,
+          selectOption,
         },
       },
       props.children
@@ -67,12 +79,12 @@ export function AmpSelector(props) {
 AmpSelector.Option = function(props) {
   const {option} = props;
   const selectorContext = useContext(AmpSelectorContext);
-  const {selected, setSelected, multiple} = selectorContext;
+  const {selected, selectOption} = selectorContext;
   const optionProps = {
     ...props,
     option,
     selected: selected.includes(option),
-    onClick: () => selectOption(option, multiple, selected, setSelected),
+    onClick: () => selectOption(option),
   };
   if (props.render) {
     return props.render(optionProps);
@@ -81,19 +93,6 @@ AmpSelector.Option = function(props) {
     props.type || props.tagName || 'div',
     optionProps,
     props.children);
-}
-
-function selectOption(option, multiple, selected, setSelected) {
-  if (multiple) {
-    setSelected(
-      selected.includes(option) ?
-      selected.filter(v => v != option) :
-      selected.concat(option));
-  } else {
-    if (!selected.includes(option)) {
-      setSelected([option]);
-    }
-  }
 }
 
 
