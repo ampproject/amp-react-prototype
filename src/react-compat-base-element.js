@@ -174,7 +174,8 @@ export default function ReactCompatibleBaseElement(Component, opts) {
     rerender_() {
       if (!this.container_) {
         // TBD: create container/shadow in the amp-element.js?
-        this.container_ = this.getWin().document.createElement('i-amphtml-c');
+        this.container_ = this.getWin().document.createElement(
+          opts.template ? 'template' : 'i-amphtml-c');
         // TBD: we want `position:absolute` in a few layouts only.
         this.container_.style.display = 'block';
         this.container_.style.position = 'absolute';
@@ -184,7 +185,14 @@ export default function ReactCompatibleBaseElement(Component, opts) {
         this.container_.style.bottom = '0';
         this.customProps_.style = {width: '100%', height: '100%'};
         if (opts.template) {
-          // Do not attach container. It will be used as a fragment.
+          // Do not attach container. It will be used as a disconnected
+          // fragment, never attached to DOM. This mode is useful for more
+          // in-depth DOM mapping where simple SD slot distribution is not
+          // applicable because of SD limitations. For instance, a
+          // `amp-selector > ul > li[option]` structure where `li` is a mapped
+          // child, separated from the `amp-selector` by a necessary `ul`
+          // intermediary. The `li[option]` is, conceptually, still a mapped
+          // slot, but SD does not allow distribution of nested children.
         } else if (opts.children || opts.passthrough) {
           const shadowRoot = this.element.attachShadow({mode: 'open'});
           const sizerSlot = this.getWin().document.createElement('slot');
