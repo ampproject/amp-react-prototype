@@ -52,6 +52,14 @@ export function Slot(props) {
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
 
+    // TBD: Just for debug for now. but maybe can also be used for hydration?
+    slot.setAttribute('i-amphtml-context', JSON.stringify(context));
+    // TODO: remove debug info.
+    assignedElements.forEach(node => {
+      node.__assignedSlot = slot;
+      node.setAttribute('i-amphtml-context', JSON.stringify(context));
+    });
+
     // Retarget slots and content.
     if (props.retarget) {
       // TBD: retargetting here is for:
@@ -93,7 +101,6 @@ export function Slot(props) {
           });
         }
       });
-
     }
 
     const oldContext = slot['i-amphtml-context'];
@@ -102,6 +109,7 @@ export function Slot(props) {
       // TODO: Switch to fast child-node discover. See Revamp for the algo.
       const affectedNodes = [];
       assignedElements.forEach(node => {
+        node['i-amphtml-context'] = context;
         affectedNodes.push(...getAmpElements(node));
       });
       affectedNodes.forEach(node => {
@@ -142,8 +150,6 @@ export function Slot(props) {
     };
   });
 
-  // TBD: Just for debug for now. but maybe can also be used for hydration?
-  slotProps['i-amphtml-context'] = JSON.stringify(context);
   return preact.createElement('slot', slotProps);
 }
 
