@@ -52,14 +52,14 @@ export function AmpSelector(props) {
     preact.createElement(
       AmpSelectorContext.Provider,
       {
-        ...props,
         value: {
           multiple,
           // TBD: controlled values require override of properties.
           selected: value ? [].concat(value) : selected,
           setSelected: setSelectedRef.current,
         },
-      }
+      },
+      props.children
     )
   );
 }
