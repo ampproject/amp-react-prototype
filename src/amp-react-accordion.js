@@ -164,7 +164,10 @@ const AmpReactAccordion = ReactCompatibleBaseElement(AmpAccordion, {
           }
         );
         const props = {
-          defaultExpanded: section.hasAttribute('expanded'),
+          expanded: section.hasAttribute('expanded'),
+          onExpand: () => {
+            section.setAttribute('expanded', '');
+          },
           type: Slot,
           name: `section[${index}]`,
           retarget: true,

@@ -228,6 +228,16 @@
           }
         });
       }
+      function expandSection(index) {
+        const sectionElements = accordion1.querySelectorAll(':scope > section');
+        sectionElements.forEach((sectionElement, i) => {
+          if (i == index) {
+            sectionElement.setAttribute('expanded', '');
+          } else {
+            sectionElement.removeAttribute('expanded');
+          }
+        });
+      }
     </script>
   </head>
   <body>
@@ -398,6 +408,9 @@
         <div>Content of section 3</div>
       </section>
     </amp-react-accordion>
+    <div>
+      <button onclick="expandSection(1)">Expand section 2</button>
+    </div>
 
     <div style="height: 500vh">scroll down...</div>
 
