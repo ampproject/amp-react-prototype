@@ -130,12 +130,17 @@ const AmpReactSelector = ReactCompatibleBaseElement(AmpSelector, {
         children.push(preact.createElement(AmpSelector.Option, props));
       });
 
-      reactBaseElement.mutateProps({defaultValue: value, children});
+      reactBaseElement.mutateProps({value, children});
     };
     mu.observe(element, {attributeFilter: ['option', 'selected'], subtree: true});
 
     // Run the first build.
     rebuild();
+    reactBaseElement.mutateProps({
+      onChange: event => {
+        reactBaseElement.mutateProps({value: event.target.value});
+      },
+    });
   },
 });
 customElements.define('amp-react-selector', AmpReactSelector);

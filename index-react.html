@@ -218,6 +218,9 @@ class App extends preact.Component {
             </AmpSelector.Option>
           </ul>
         </AmpSelector>
+        <div>
+          <button onClick={() => this.setState({selector1Value: '2'})}>Select option 2</button>
+        </div>
 
         <div style={{height: '500vh'}}>scroll down...</div>
         <AmpImg

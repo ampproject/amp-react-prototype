@@ -204,6 +204,16 @@
           }
         });
       }
+      function selectOption(option) {
+        const optionElements = selector1.querySelectorAll(':scope > ul > li');
+        optionElements.forEach(optionElement => {
+          if (optionElement.getAttribute('option') == option) {
+            optionElement.setAttribute('selected', '');
+          } else {
+            optionElement.removeAttribute('selected');
+          }
+        });
+      }
     </script>
   </head>
   <body>
@@ -346,6 +356,9 @@
         <li option="3">Option 3</li>
       </ul>
     </amp-react-selector>
+    <div>
+      <button onclick="selectOption('2')">Select option 2</button>
+    </div>
 
     <div style="height: 500vh">scroll down...</div>
 
