@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpRoot} from './amp-root.js';
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {useStateFromProp} from './amp-react-utils.js';
 import {withAmpContext} from './amp-context.js';
@@ -156,19 +157,18 @@ export function AmpCarousel(props) {
     });
   };
 
-  return preact.createElement('div', {
-    style: {
-      ...props.style,
-      position: 'relative',
-      overflow: 'hidden',
+  return preact.createElement(
+    AmpRoot,
+    {
+      ...props,
+      // Just for debugging.
+      'debug-current-slide': currentSlide,
     },
-    // Just for debugging.
-    'debug-current-slide': currentSlide,
-  }, [
-    scroller(),
-    arrow(-1),
-    arrow(1),
-  ]);
+    [
+      scroller(),
+      arrow(-1),
+      arrow(1),
+    ]);
 }
 
 const AmpReactCarousel = ReactCompatibleBaseElement(AmpCarousel, {

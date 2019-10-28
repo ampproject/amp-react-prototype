@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpRoot} from './amp-root.js';
 import ReactCompatibleBaseElement from './react-compat-base-element.js';
 import {
   AmpContext,
@@ -89,25 +90,32 @@ export function AmpFitText(props) {
     el.style.visibility = '';
   });
 
-  return preact.createElement('div', {
-    ...props,
-    style: {
-      ...props.style,
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      flexWrap: 'nowrap',
-      justifyContent: 'center',
+  return preact.createElement(
+    AmpRoot,
+    {
+      ...props,
+      style: {
+        ...props.style,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'nowrap',
+        justifyContent: 'center',
+      },
+      ref: containerRef,
     },
-    ref: containerRef,
-  }, preact.createElement('div', {
-    ref: contentRef,
-    style: {
-      lineHeight: LINE_HEIGHT_EM,
-      fontSize: fontSizeRef.current || '',
-    },
-  }, props.children));
+    preact.createElement(
+      'div',
+      {
+        ref: contentRef,
+        style: {
+          lineHeight: LINE_HEIGHT_EM,
+          fontSize: fontSizeRef.current || '',
+        },
+      },
+      props.children
+    )
+  );
 }
 
 /**

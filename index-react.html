@@ -20,12 +20,14 @@
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutube} from './src/amp-react-youtube.js';
     import {AmpFitText} from './src/amp-react-fit-text.js';
+    import {AmpWithLayout} from './src/amp-react-layout.js';
     window.AmpImg = AmpImg;
     window.AmpCarousel = AmpCarousel;
     window.AmpLightbox = AmpLightbox;
     window.AmpSize = AmpSize;
     window.AmpYoutube = AmpYoutube;
     window.AmpFitText = AmpFitText;
+    window.AmpWithLayout = AmpWithLayout;
   </script>
 </head>
 <body>
@@ -119,9 +121,12 @@ class App extends preact.Component {
           >
         </AmpImg>
 
-        <AmpCarousel
+        <AmpWithLayout
+          type={AmpCarousel}
+          layout="responsive"
+          width={300}
+          height={100}
           id="c1"
-          style={{width: '100%', height: '150px'}}
           currentSlide={1}
           arrowNext={(
             <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
@@ -146,7 +151,7 @@ class App extends preact.Component {
               </AmpImg>
             </div>
           ))}
-        </AmpCarousel>
+        </AmpWithLayout>
 
         <div style={{margin: '8px 0'}}>
           <button onClick={() => this.setState({slides: [-1, 0, 1, 2, 3, 4, 5]})}>Add slide</button>
@@ -157,9 +162,15 @@ class App extends preact.Component {
           <AmpSize style={{position: 'absolute', width: '100%', height: '100%'}}></AmpSize>
         </div>
 
-        <AmpFitText style={{width: '100%', height: '80px', border: '1px dotted lightgray'}}>
+        <AmpWithLayout
+          type={AmpFitText}
+          layout="responsive"
+          width={300}
+          height={80}
+          style={{border: '1px dotted lightgray'}}
+          >
           Can you fit this text?
-        </AmpFitText>
+        </AmpWithLayout>
 
         <div style={{height: '500vh'}}>scroll down...</div>
         <AmpImg
