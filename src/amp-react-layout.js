@@ -20,6 +20,11 @@ import {
 } from './amp-context.js';
 import { useHasEverLoaded } from './amp-react-utils.js';
 
+const {
+  useState,
+} = preactHooks;
+
+
 /**
  * @enum {string}
  */
@@ -40,6 +45,8 @@ export function AmpWithLayout(props) {
   // This code is forked from `applyStaticLayout`.
   // TBD: refactor `applyStaticLayout` to make this less forked.
 
+  const [hasBeenLoaded, setHasBeenLoaded] = useState(false);
+
   // Parse layout from props.
   const {
     type,
@@ -47,6 +54,7 @@ export function AmpWithLayout(props) {
     layout: layoutAttr,
     width: widthAttr,
     height: heightAttr,
+    placeholder,
   } = props;
 
   // Input layout attributes.
@@ -153,6 +161,17 @@ export function AmpWithLayout(props) {
     // TODO: partial implementation.
   }
 
+  // Placeholder.
+  if (placeholder && !hasBeenLoaded) {
+    // TBD: how to force placeholder to take 100% space?
+    layoutChildren.push(placeholder);
+  }
+
+  // Loading indicator.
+  if (!hasBeenLoaded) {
+    layoutChildren.push(preact.createElement(Loader));
+  }
+
   // TODO: loading indicator.
 
   return preact.createElement(
@@ -167,13 +186,49 @@ export function AmpWithLayout(props) {
           layout: undefined,
           width: undefined,
           height: undefined,
+          placeholder: undefined,
           // Styles.
           style: {
             ...props.style,
             ...childStyle,
           },
+          // Loading.
+          // TODO: ensure that all AMP elements yield onLoad.
+          // TBD: is it ever possible that we are too late here for the onLoad
+          // event?
+          onLoad: () => setHasBeenLoaded(true),
         }
       )
+    )
+  );
+}
+
+
+/**
+ * Loader component.
+ */
+function Loader(props) {
+  // TBD: very hard to animate without `@keyframes` global.
+  // TBD: use `useInViewportEffect()` to start/stop animations.
+  return preact.createElement(
+    'i-amphtml-loader',
+    {
+      style: {
+        'position': 'absolute',
+        'inset': 0,
+        'zIndex': 3,
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        // TODO: remove; debugging only.
+        'background': 'rgba(0, 0, 0, 0.7)',
+        'color': '#fff',
+      },
+    },
+    preact.createElement(
+      'div',
+      {},
+      'loading...'
     )
   );
 }
