@@ -163,16 +163,21 @@ export function AmpWithLayout(props) {
 
   // Placeholder.
   if (placeholder && !hasBeenLoaded) {
-    // TBD: how to force placeholder to take 100% space?
-    layoutChildren.push(placeholder);
+    layoutChildren.push(preact.cloneElement(placeholder, {
+      style: {
+        ...placeholder.style,
+        'position': 'absolute',
+        'inset': 0,
+        // TODO: debug only.
+        'color': '#fff',
+      },
+    }));
   }
 
   // Loading indicator.
   if (!hasBeenLoaded) {
     layoutChildren.push(preact.createElement(Loader));
   }
-
-  // TODO: loading indicator.
 
   return preact.createElement(
     tagName || 'amp-element',
@@ -196,7 +201,7 @@ export function AmpWithLayout(props) {
           // TODO: ensure that all AMP elements yield onLoad.
           // TBD: is it ever possible that we are too late here for the onLoad
           // event?
-          onLoad: () => setHasBeenLoaded(true),
+          onLoad: () => setTimeout(() => setHasBeenLoaded(true), 4000),
         }
       )
     )
