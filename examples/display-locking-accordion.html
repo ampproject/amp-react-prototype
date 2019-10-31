@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Examples: display locking</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <style>
+      .accordion {
+        position: relative;
+      }
+
+      .accordion > section {
+        border: 1px dotted lightgray;
+      }
+
+      .accordion > section > *:nth-child(2) {
+        display: block;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .accordion > section:not([open]) > *:nth-child(2) {
+        position: absolute;
+        width: 100%;
+        height: 0px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+
+    <details>
+      <summary>Details 1</summary>
+      <div rendersubtree="invisible skip-viewport-activation">
+        This will not work, b/c details section is display:none.
+      </div>
+    </details>
+
+    <div class="accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content of section 1
+          <div>more</div>
+        </div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content of section 2
+          <div>more2</div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      function Accordion(element, opts = {}) {
+        const sections = element.querySelectorAll('section');
+
+        function selectSection(section) {
+          for (let i = 0; i < sections.length; i++) {
+            if (sections[i] == section) {
+              section.setAttribute('open', '');
+              sections[i].children[1].renderSubtree = '';
+            } else {
+              sections[i].removeAttribute('open');
+              sections[i].children[1].renderSubtree = 'invisible skip-viewport-activation';
+            }
+          }
+        }
+
+        for (let i = 0; i < sections.length; i++) {
+          sections[i].children[0].addEventListener('click', e => {
+            selectSection(e.target.parentElement);
+          });
+        }
+
+        element.addEventListener('beforeactivate', e => {
+          const section = e.target.closest('.accordion > section');
+          if (section) {
+            selectSection(section);
+          }
+        });
+
+        selectSection(sections[0]);
+      }
+
+      Accordion(document.querySelector('.accordion'));
+    </script>
+  </body>
+</html>
