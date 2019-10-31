@@ -55,6 +55,7 @@ export function AmpWithLayout(props) {
     width: widthAttr,
     height: heightAttr,
     placeholder,
+    showLoadingIndicator,
   } = props;
 
   // Input layout attributes.
@@ -175,7 +176,7 @@ export function AmpWithLayout(props) {
   }
 
   // Loading indicator.
-  if (!hasBeenLoaded) {
+  if (showLoadingIndicator && !hasBeenLoaded) {
     layoutChildren.push(preact.createElement(Loader));
   }
 
