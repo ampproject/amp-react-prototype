@@ -14,20 +14,22 @@
   <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
-    import {AmpImg} from './src/amp-react-img.js';
     import {AmpCarousel} from './src/amp-react-carousel.js';
+    import {AmpFitText} from './src/amp-react-fit-text.js';
+    import {AmpImg} from './src/amp-react-img.js';
+    import {AmpLayout} from './src/amp-react-layout.js';
     import {AmpLightbox} from './src/amp-react-lightbox.js';
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutube} from './src/amp-react-youtube.js';
-    import {AmpFitText} from './src/amp-react-fit-text.js';
-    import {AmpLayout} from './src/amp-react-layout.js';
-    window.AmpImg = AmpImg;
-    window.AmpCarousel = AmpCarousel;
-    window.AmpLightbox = AmpLightbox;
-    window.AmpSize = AmpSize;
-    window.AmpYoutube = AmpYoutube;
-    window.AmpFitText = AmpFitText;
-    window.AmpLayout = AmpLayout;
+    Object.assign(window, {
+      AmpCarousel,
+      AmpImg,
+      AmpFitText,
+      AmpLayout,
+      AmpLightbox,
+      AmpSize,
+      AmpYoutube,
+    });
   </script>
 </head>
 <body>
