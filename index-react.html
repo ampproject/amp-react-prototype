@@ -20,14 +20,14 @@
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutube} from './src/amp-react-youtube.js';
     import {AmpFitText} from './src/amp-react-fit-text.js';
-    import {AmpWithLayout} from './src/amp-react-layout.js';
+    import {AmpLayout} from './src/amp-react-layout.js';
     window.AmpImg = AmpImg;
     window.AmpCarousel = AmpCarousel;
     window.AmpLightbox = AmpLightbox;
     window.AmpSize = AmpSize;
     window.AmpYoutube = AmpYoutube;
     window.AmpFitText = AmpFitText;
-    window.AmpWithLayout = AmpWithLayout;
+    window.AmpLayout = AmpLayout;
   </script>
 </head>
 <body>
@@ -113,51 +113,54 @@ class App extends preact.Component {
 
 
         <h1>amp-react-img</h1>
-        <AmpWithLayout
+        <AmpLayout
           layout="responsive"
           width={300}
           height={90}
           placeholder={(
             <div>placeholder. waiting to load.</div>
           )}
-          showLoadingIndicator
-          id="first"
-          type={AmpImg}
-          alt="preact img"
-          srcSet="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
-          />
+          showLoadingIndicator >
+          <AmpImg
+            id="first"
+            type={AmpImg}
+            alt="preact img"
+            srcSet="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
+            />
+        </AmpLayout>
 
-        <AmpWithLayout
-          type={AmpCarousel}
+        <AmpLayout
           layout="responsive"
           width={300}
-          height={100}
-          id="c1"
-          currentSlide={1}
-          arrowNext={(
-            <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
-          )}
-          >
-          {this.state.slides.map(index => index == 1 ? (
-            <AmpYoutube
-                key="slide-yt"
-                id="c1_yt1"
-                videoid="TEcvbWCYFZg"
-                style={{width: '120px', height: '90px'}}
-                />
-            ) : (
-            <div key={`slide-${index}`}>
-              slide{index}
-              <AmpImg
-                id={`c1_slide${index}_img`}
-                alt="bindable"
-                src={`https://via.placeholder.com/90x90.png?text=slide${index}`}
-                style={{width: '90px', height: '90px'}}
-                >
-              </AmpImg>
-            </div>
-          ))}
-        </AmpWithLayout>
+          height={100} >
+          <AmpCarousel
+            id="c1"
+            currentSlide={1}
+            arrowNext={(
+              <button style={{position: 'absolute', right: '8px', top: 'calc(50% - 16px)'}}>&rarr;</button>
+            )}
+            >
+            {this.state.slides.map(index => index == 1 ? (
+              <AmpYoutube
+                  key="slide-yt"
+                  id="c1_yt1"
+                  videoid="TEcvbWCYFZg"
+                  style={{width: '120px', height: '90px'}}
+                  />
+              ) : (
+              <div key={`slide-${index}`}>
+                slide{index}
+                <AmpImg
+                  id={`c1_slide${index}_img`}
+                  alt="bindable"
+                  src={`https://via.placeholder.com/90x90.png?text=slide${index}`}
+                  style={{width: '90px', height: '90px'}}
+                  >
+                </AmpImg>
+              </div>
+            ))}
+          </AmpCarousel>
+        </AmpLayout>
 
         <div style={{margin: '8px 0'}}>
           <button onClick={() => this.setState({slides: [-1, 0, 1, 2, 3, 4, 5]})}>Add slide</button>
@@ -168,15 +171,16 @@ class App extends preact.Component {
           <AmpSize style={{position: 'absolute', width: '100%', height: '100%'}}></AmpSize>
         </div>
 
-        <AmpWithLayout
-          type={AmpFitText}
+        <AmpLayout
           layout="responsive"
           width={300}
           height={80}
           style={{border: '1px dotted lightgray'}}
           >
-          Can you fit this text?
-        </AmpWithLayout>
+          <AmpFitText>
+            Can you fit this text?
+          </AmpFitText>
+        </AmpLayout>
 
         <div style={{height: '500vh'}}>scroll down...</div>
         <AmpImg
