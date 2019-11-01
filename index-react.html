@@ -113,13 +113,19 @@ class App extends preact.Component {
 
 
         <h1>amp-react-img</h1>
-        <AmpImg
+        <AmpWithLayout
+          layout="responsive"
+          width={300}
+          height={90}
+          placeholder={(
+            <div>placeholder. waiting to load.</div>
+          )}
+          showLoadingIndicator
           id="first"
+          type={AmpImg}
           alt="preact img"
           srcSet="https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 100w"
-          style={{width: '300px', height: '90px'}}
-          >
-        </AmpImg>
+          />
 
         <AmpWithLayout
           type={AmpCarousel}
