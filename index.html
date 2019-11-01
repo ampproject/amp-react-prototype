@@ -170,6 +170,16 @@
       {
         display: none;
       }
+
+      /* Collapse content by default. */
+      amp-react-accordion > section > :last-child {
+        display: none !important;
+      }
+
+      /* Expand content when needed. */
+      amp-react-accordion > section[expanded] > :last-child {
+        display: block !important;
+      }
     </style>
 
     <script src="https://unpkg.com/preact@10.0.0-rc.3/dist/preact.umd.js"></script>
@@ -183,9 +193,13 @@
     <script type="module" src="./src/amp-react-unload-outside-viewport.js"></script>
     <script type="module" src="./src/amp-react-fit-text.js"></script>
     <script type="module" src="./src/amp-react-selector.js"></script>
+    <script type="module" src="./src/amp-react-accordion.js"></script>
     <style>
-      li[selected] {
+      amp-react-selector > ul > li[selected] {
         font-weight: bold;
+      }
+      amp-react-accordion > section {
+        border: 1px dotted lightpink;
       }
     </style>
     <script>
@@ -211,6 +225,16 @@
             optionElement.setAttribute('selected', '');
           } else {
             optionElement.removeAttribute('selected');
+          }
+        });
+      }
+      function expandSection(index) {
+        const sectionElements = accordion1.querySelectorAll(':scope > section');
+        sectionElements.forEach((sectionElement, i) => {
+          if (i == index) {
+            sectionElement.setAttribute('expanded', '');
+          } else {
+            sectionElement.removeAttribute('expanded');
           }
         });
       }
@@ -358,6 +382,34 @@
     </amp-react-selector>
     <div>
       <button onclick="selectOption('2')">Select option 2</button>
+    </div>
+
+    <amp-react-accordion
+      id="accordion1"
+      layout="container"
+      style="border: 1px dotted lightgray;">
+      <section expanded>
+        <h3>Section 1</h3>
+        <div>Content of section 1</div>
+      </section>
+      <section>
+        <h3>Section 2</h3>
+        <div>Content of section 2
+          <amp-react-youtube
+              id="accordion1_section2_yt"
+              data-videoid="TEcvbWCYFZg"
+              width="120"
+              height="90">
+          </amp-react-youtube>
+        </div>
+      </section>
+      <section disabled>
+        <h3>Section 3</h3>
+        <div>Content of section 3</div>
+      </section>
+    </amp-react-accordion>
+    <div>
+      <button onclick="expandSection(1)">Expand section 2</button>
     </div>
 
     <div style="height: 500vh">scroll down...</div>

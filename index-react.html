@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.js"></script>
   <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
   <script type="module">
+    import {AmpAccordion} from './src/amp-react-accordion.js';
     import {AmpCarousel} from './src/amp-react-carousel.js';
     import {AmpFitText} from './src/amp-react-fit-text.js';
     import {AmpImg} from './src/amp-react-img.js';
@@ -23,6 +24,7 @@
     import {AmpSize} from './src/amp-react-size.js';
     import {AmpYoutube} from './src/amp-react-youtube.js';
     Object.assign(window, {
+      AmpAccordion,
       AmpCarousel,
       AmpImg,
       AmpFitText,
@@ -54,6 +56,7 @@ class App extends preact.Component {
     slides: [0, 1, 2, 3, 4, 5],
     lightbox1Open: false,
     selector1Value: '1',
+    accordion1Expanded: '1',
   };
 
   constructor(props) {
@@ -220,6 +223,46 @@ class App extends preact.Component {
         </AmpSelector>
         <div>
           <button onClick={() => this.setState({selector1Value: '2'})}>Select option 2</button>
+        </div>
+
+        <AmpAccordion style={{border: '1px dotted lightgray'}}>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            expanded={'1' == this.state.accordion1Expanded}
+            onExpand={() => this.setState({accordion1Expanded: '1'})}
+            header={(
+              <h3>Section 1</h3>
+            )}>
+            <div>Content of section 1</div>
+          </AmpAccordion.Section>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            expanded={'2' == this.state.accordion1Expanded}
+            onExpand={() => this.setState({accordion1Expanded: '2'})}
+            header={(
+              <h3>Section 2</h3>
+            )}>
+            <div>Content of section 2
+              <AmpYoutube
+                  id="accordion1_section2_yt1"
+                  videoid="TEcvbWCYFZg"
+                  style={{width: '120px', height: '90px'}}
+                  />
+            </div>
+          </AmpAccordion.Section>
+          <AmpAccordion.Section
+            style={{border: '1px dotted lightpink'}}
+            expanded={'3' == this.state.accordion1Expanded}
+            onExpand={() => this.setState({accordion1Expanded: '3'})}
+            disabled
+            header={(
+              <h3>Section 3</h3>
+            )}>
+            <div>Content of section 3</div>
+          </AmpAccordion.Section>
+        </AmpAccordion>
+        <div>
+          <button onClick={() => this.setState({accordion1Expanded: '2'})}>Expand section 2</button>
         </div>
 
         <div style={{height: '500vh'}}>scroll down...</div>
