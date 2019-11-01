@@ -41,7 +41,7 @@ export const Layout = {
 };
 
 
-export function AmpWithLayout(props) {
+export function AmpLayout(props) {
   // This code is forked from `applyStaticLayout`.
   // TBD: refactor `applyStaticLayout` to make this less forked.
 
@@ -49,7 +49,6 @@ export function AmpWithLayout(props) {
 
   // Parse layout from props.
   const {
-    type,
     tagName,
     layout: layoutAttr,
     width: widthAttr,
@@ -180,32 +179,29 @@ export function AmpWithLayout(props) {
     layoutChildren.push(preact.createElement(Loader));
   }
 
+  const children = preact.toChildArray(props.children);
+  const toLayout = children && children[0];
+  if (toLayout) {
+    layoutChildren.push(preact.cloneElement(
+      toLayout,
+      {
+        style: {
+          ...props.style,
+          ...childStyle,
+        },
+        // Loading.
+        // TODO: ensure that all AMP elements yield onLoad.
+        // TBD: is it ever possible that we are too late here for the onLoad
+        // event?
+        onLoad: () => setTimeout(() => setHasBeenLoaded(true), 4000),
+      }
+    ));
+  }
+
   return preact.createElement(
     tagName || 'amp-element',
     layoutProps,
-    layoutChildren.concat(
-      preact.createElement(
-        type,
-        {
-          ...props,
-          // Remove layout props.
-          layout: undefined,
-          width: undefined,
-          height: undefined,
-          placeholder: undefined,
-          // Styles.
-          style: {
-            ...props.style,
-            ...childStyle,
-          },
-          // Loading.
-          // TODO: ensure that all AMP elements yield onLoad.
-          // TBD: is it ever possible that we are too late here for the onLoad
-          // event?
-          onLoad: () => setTimeout(() => setHasBeenLoaded(true), 4000),
-        }
-      )
-    )
+    layoutChildren
   );
 }
 

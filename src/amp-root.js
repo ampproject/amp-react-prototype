@@ -17,7 +17,7 @@
 
 /**
  * Most of AMP components should wrap inside this component to ensure the
- * correct adaptation to both CE and AmpWithLayout.
+ * correct adaptation to both CE and AmpLayout.
  */
 export const AmpRoot = preactCompat.forwardRef((props, ref) => {
   return preact.createElement(
