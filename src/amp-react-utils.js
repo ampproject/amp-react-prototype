@@ -16,6 +16,7 @@
 
 import { AmpContext } from './amp-context.js';
 const {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -51,12 +52,30 @@ export function useStateFromProp(prop) {
 
 
 /**
+ * @param {function(current):*} callback
+ */
+export function useRefEffect(callback) {
+  const unsubscribeRef = useRef();
+  return useCallback(current => {
+    // `current` will be either a new value or null.
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+    if (current) {
+      unsubscribeRef.current = callback(current);
+    }
+  }, [/*mount only*/]);
+}
+
+
+/**
  * @param {!Element} elementRef
  * @param {function(number, number)} callback
+ * @return {Ref}
  */
-export function useResizeEffect(elementRef, callback) {
-  useMountEffect(() => {
-    const element = elementRef.current;
+export function useResizeEffect(callback) {
+  return useRefEffect(element => {
     if (window.ResizeObserver) {
       // TBD: Is there a large cost for creating new resize observers for
       //      each invocation? If so, we can provide a shared instance
@@ -70,7 +89,7 @@ export function useResizeEffect(elementRef, callback) {
       const resizeObserver = new ResizeObserver(entries => {
         const entry = entries[entries.length - 1];
         const {width, height} = entry.contentRect;
-        callback(width, height);
+        callback(element, width, height);
       });
       resizeObserver.observe(element);
       return function unmount() {
