@@ -14,6 +14,6 @@ const Button = ({children}) => {
   );
 }
 
-const View1 = () => <Button>Submit</Button>
+const View1 = ({name}) => <Button>{name} Submit</Button>
 
 export default View1;
