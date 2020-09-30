@@ -13,4 +13,5 @@ export const View1Story = () => {
   const name = text('name', 'lightcoral');
   return <View1 name={name}/>;
 };
+
 export const View2Story = () => <View2/>;
