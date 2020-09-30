@@ -1,6 +1,6 @@
 
 import {roboto} from './fonts.css';
-import {css} from './use-goober';
+import {css, keyframes} from './use-goober';
 
 /*
  * TBD:
@@ -11,16 +11,12 @@ import {css} from './use-goober';
 
 const specalButton = css``;
 
-const keyframesName = css``;
-
-const keyframes = css`
-  @keyframes ${keyframesName} {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 `;
 
@@ -36,7 +32,7 @@ const myButton = css`
   &.${specalButton}:hover {
     outline: 2px solid red;
   }
-  animation: 4s linear 0s 2 alternate ${keyframesName};
+  animation: 4s linear 0s 2 alternate ${rotate};
 `;
 
 const myLabel = css({
