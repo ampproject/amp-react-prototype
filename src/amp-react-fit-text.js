@@ -164,5 +164,6 @@ const AmpReactFitText = ReactCompatibleBaseElement(AmpFitText, {
     },
   },
   passthrough: true,
+  subtree: true,
 });
 customElements.define('amp-fit-text', AmpReactFitText);

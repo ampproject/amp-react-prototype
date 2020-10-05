@@ -54,6 +54,10 @@ export default function AmpElementFactory(BaseElement) {
         // attributes as well.
         moOptions['childList'] = true;
       }
+      if (opts.subtree) {
+        moOptions['subtree'] = true;
+        moOptions['characterData'] = true;
+      }
 
       if (Object.keys(moOptions).length > 0) {
         const mo = new MutationObserver(this.handleMutationObserver_.bind(this));
@@ -111,6 +115,9 @@ export default function AmpElementFactory(BaseElement) {
             attrs[attributeName] = this.getAttribute(attributeName);
             break;
           case 'childList':
+            childrenChanged = true;
+            break;
+          case 'characterData':
             childrenChanged = true;
             break;
         }
