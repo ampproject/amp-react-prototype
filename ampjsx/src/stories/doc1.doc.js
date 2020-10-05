@@ -11,6 +11,7 @@ export default function Doc() {
       <Style>
         {`
           h1 {
+            --value: qqqq;
             background: pink;
           }
           .warning {
@@ -28,16 +29,16 @@ export default function Doc() {
 
       <h1>Doc1</h1>
 
-      <div>
-        <button onClick={() => setShowWarning(prev => !prev)}>Show warning</button>
-        <div className="warning" hidden={!showWarning}>WARNING!</div>
+      <p>some very long content</p>
+
+      <div data-sparse-id="s1" data-full-rendering-only-value="true">
+        <button data-sparse-id="s2" onClick={() => setShowWarning(prev => !prev)}>Show warning</button>
+        <div data-sparse-id="s3" className="warning" hidden={!showWarning}>WARNING!</div>
       </div>
 
       <Img />
 
-      <Heavy placeholder={
-        <Img />
-      } />
+      <Heavy data-sparse-id="s4" placeholder={ <Img /> } showWarning={showWarning} />
     </AmpDoc>
   );
 }

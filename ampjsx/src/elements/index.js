@@ -13,11 +13,11 @@ export function withWrapper(comp) {
 }
 
 export function Img() {
-  return <div>Img</div>;
+  return <span>Img</span>;
 }
 
-function HeavyProto() {
-  return <div className="heavy">Heavy</div>;
+function HeavyProto({placeholder, showWarning, ...rest}) {
+  return <div {...rest} className="heavy" style={{border: `1px solid ${showWarning ? 'red' : 'black'}`}}>Heavy: {placeholder}</div>;
 }
 
 export const Heavy = withWrapper(HeavyProto);
