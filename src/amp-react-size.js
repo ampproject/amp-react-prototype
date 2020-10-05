@@ -26,10 +26,7 @@ const {
 
 
 export function AmpSize(props) {
-  const sizeRef = useRef();
-
-  useResizeEffect(sizeRef, (width, height) => {
-    const el = sizeRef.current;
+  const sizeRef = useResizeEffect((el, width, height) => {
     el.textContent = `${width}x${height}`;
   });
 
