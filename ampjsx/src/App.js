@@ -35,7 +35,7 @@ function App() {
     const iframe = iframeRef2.current;
     createDoc().then(doc => {
       iframe.srcdoc = `
-        <script src="http://localhost:3001/dist/index.js" defer></script>
+        <script src="/worker-main-thread.js" defer></script>
 
         <div id="root" src="/index.sparse.rollup.js">
           ${extractDoc(doc)}
